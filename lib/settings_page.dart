@@ -308,7 +308,7 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () async {
               try {
-                final result = await FilePicker.platform.pickFiles(
+                final result = await FilePicker.pickFiles(
                   type: FileType.custom,
                   allowedExtensions: ['json'],
                   withData: true, // needed for web
@@ -529,7 +529,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 label: Text("Upload Image"),
                 onPressed: () async {
                   try {
-                    final result = await FilePicker.platform.pickFiles(
+                    final result = await FilePicker.pickFiles(
                       type: FileType.custom,
                       allowedExtensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
                       withData: true, // required for web
@@ -831,7 +831,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
       // On web/mobile, FilePicker has handle bytes directly
       if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
-        final path = await FilePicker.platform.saveFile(
+        final path = await FilePicker.saveFile(
           dialogTitle: 'Save Settings',
           fileName: 'settings.json',
           bytes: Uint8List.fromList(json.codeUnits),
@@ -839,7 +839,7 @@ class _SettingsPageState extends State<SettingsPage> {
         if (path == null) return; // user cancelled
       } else {
         // On desktop, manually write to the selected path
-        final path = await FilePicker.platform.saveFile(
+        final path = await FilePicker.saveFile(
           dialogTitle: 'Save Settings',
           fileName: 'settings.json',
         );
@@ -863,7 +863,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _importSettings(BuildContext context) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         dialogTitle: "Choose Settings File",
         type: FileType.custom,
         allowedExtensions: ['json'],
