@@ -13,7 +13,6 @@ import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:second/config_table.dart';
-import 'package:second/message_board_loader.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
