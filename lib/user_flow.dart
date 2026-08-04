@@ -623,16 +623,6 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                             Navigator.of(context).pop();
                                           }
                                         : null,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(24.0),
-                                      child: Text(
-                                        "Clock Out",
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
                                     style: ButtonStyle(
                                       shape: WidgetStatePropertyAll(
                                         RoundedRectangleBorder(
@@ -640,6 +630,16 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                               BorderRadiusGeometry.all(
                                                 Radius.circular(16.0),
                                               ),
+                                        ),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Text(
+                                        "Clock Out",
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),

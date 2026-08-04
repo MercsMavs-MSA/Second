@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:googleapis/batch/v1.dart';
 import 'package:googleapis/sheets/v4.dart';
-import 'package:second/util.dart';
 
 class MessageBoardEntry {
   String title;
@@ -106,9 +104,6 @@ class MessageBoardConfigurationTable {
   }
 
   Future<void> _initializeSheet() async {
-    final now = DateTime.now();
-    final List<MessageBoardEntry> defaultEntries = [];
-
     await api.spreadsheets.values.update(
       ValueRange(values: [headerOrder], majorDimension: "COLUMNS"),
       spreadsheet.spreadsheetId ?? "",
