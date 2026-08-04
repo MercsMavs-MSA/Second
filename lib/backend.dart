@@ -22,7 +22,7 @@ enum AttendanceStatus { present, out }
 
 enum MemberPrivilege { admin, student, mentor, custom }
 
-enum MemberLoggerAction { created, checkIn, checkOut, disabled, error }
+enum MemberLoggerAction { created, checkIn, checkOut, checkOutAuto, disabled, error }
 
 abstract class SerializableItem {
   Map<String, dynamic> serialize();
@@ -267,7 +267,8 @@ class ClockInEvent extends TimeClockEvent {
 }
 
 class ClockOutEvent extends TimeClockEvent {
-  ClockOutEvent(super.memberId, super.time);
+  final bool isAuto;
+  ClockOutEvent(super.memberId, super.time, {this.isAuto = false});
 }
 
 class PasswordResetEvent extends TimeClockEvent {
@@ -769,7 +770,7 @@ class AttendanceTrackerBackend {
         _logQueue.add(
           MemberLogEntry(
             event.memberId,
-            MemberLoggerAction.checkOut,
+            event.isAuto ? MemberLoggerAction.checkOutAuto : MemberLoggerAction.checkOut,
             event.time,
             "NULL",
           ),
@@ -1220,14 +1221,14 @@ class AttendanceTrackerBackend {
     return attendance.value.any((member) => member.id == id);
   }
 
-  void clockOut(int memberId, {DateTime? time}) {
+  void clockOut(int memberId, {DateTime? time, bool isAuto = false}) {
     time ??= DateTime.now();
 
     if (!attendance.value.any((member) => member.id == memberId)) {
       throw Exception('Member with ID $memberId not found');
     }
 
-    final event = ClockOutEvent(memberId, time);
+    final event = ClockOutEvent(memberId, time, isAuto: isAuto);
     _clockOutQueue.add(event);
     // if (_clockInQueue
     //     .map((e) => e is ClockInEvent ? e.memberId : null)

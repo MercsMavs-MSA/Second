@@ -300,7 +300,7 @@ class _HomePageState extends State<HomePage>
         await _backend.instantMemberUpdate();
         for (final member in _backend.attendance.value) {
           if (member.status == AttendanceStatus.present) {
-            _backend.clockOut(member.id, time: appliedTime);
+            _backend.clockOut(member.id, time: appliedTime, isAuto: true);
           }
         }
       },
