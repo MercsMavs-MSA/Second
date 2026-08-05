@@ -258,7 +258,7 @@ class _HomePageState extends State<HomePage>
 
   void _updateFilteredMembers() {
     final List<Member> members = _backend.attendance.value.where((member) {
-      return member.name.toLowerCase().contains(_searchQuery.text.toLowerCase());
+      return member.name.toLowerCase().contains(_searchQuery.text.toLowerCase()) && !member.groups.contains("unlisted");
     }).toList();
 
     members.sort((a, b) {
