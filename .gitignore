@@ -46,3 +46,6 @@ app.*.map.json
 
 # docs
 site/
+
+# FVM Version Cache
+.fvm/

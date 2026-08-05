@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "/home/kevin/Code/FRC/second/linux"
+  "cmake.sourceDirectory": "/home/kevin/Code/FRC/second/linux",
+  "dart.flutterSdkPath": ".fvm/versions/3.44.8"
 }
