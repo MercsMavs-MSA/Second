@@ -1206,18 +1206,7 @@ class _HomePageState extends State<HomePage>
                                               ),
                                               title: Text(member.name),
                                               subtitle: Text(
-                                                member.status ==
-                                                        AttendanceStatus.out
-                                                    ? member.privilege ==
-                                                              MemberPrivilege
-                                                                  .custom
-                                                          ? "Unrecognized Role"
-                                                          : member.privilege
-                                                                .toString()
-                                                                .split('.')
-                                                                .last
-                                                                .capitalize()
-                                                    : "${member.privilege == MemberPrivilege.custom ? "Unrecognized Role" : member.privilege.toString().split('.').last.capitalize()} · ${member.location!}",
+                                                member.getTitles()?.join(" · ") ?? "Error loading title, please refresh members",
                                               ),
                                               onTap: () {
                                                 if (widget.settingsManager

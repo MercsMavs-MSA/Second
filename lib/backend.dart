@@ -111,17 +111,26 @@ class Member {
   final AttendanceStatus status;
   final String? location;
   final String? passwordHash;
+  final String titles;
   final MemberPrivilege privilege;
   final String? pfpUrl;
   Member(
     this.id,
     this.name,
+    this.titles,
     this.status, {
     this.location,
     this.passwordHash,
     this.privilege = MemberPrivilege.student,
     this.pfpUrl,
   });
+
+  Iterable<String>? getTitles() {
+    if (titles.isEmpty) {
+      return null;
+    }
+    return titles.split(",").map((s){return s.trim();});
+  }
 
   @override
   String toString() {
@@ -132,6 +141,7 @@ class Member {
     return {
       'id': id,
       'name': name,
+      'titles': titles,
       'status': status.name,
       'location': location,
       'privilege': privilege.name,
@@ -154,6 +164,7 @@ class Member {
           ? data['id'] as int
           : int.tryParse(data['id'].toString()) ?? -1,
       data['name'] as String,
+      (data['titles'] as String? ?? "Error loading title, please refresh members"),
       AttendanceStatus.values.byName((data['status'] as String).toLowerCase()),
       location: data['location'] as String?,
       passwordHash: data['passwordHash'] as String?,
@@ -710,12 +721,13 @@ class AttendanceTrackerBackend {
           (parsedPfp?.startsWith("=image(\"") ?? false)) {
         parsedPfp = parsedPfp?.replaceFirst("=IMAGE(\"", "");
         parsedPfp = parsedPfp?.replaceFirst("=image(\"", "");
-        parsedPfp = parsedPfp?.substring(0, parsedPfp.length - 2);
+        parsedPfp = parsedPfp?.substring(0, parsedPfp.length - 2).trim();
       }
       newMembers.add(
         Member(
           int.tryParse(googleMember[appMembersSchema.indexOf("ID")].toString()) ?? -1,
           googleMember[appMembersSchema.indexOf("Name")] as String,
+          googleMember[appMembersSchema.indexOf("Titles")] as String,
           AttendanceStatus.values.byName(
             (googleMember[appMembersSchema.indexOf("Status")] as String).toLowerCase(),
           ),
@@ -1273,6 +1285,7 @@ class AttendanceTrackerBackend {
       attendance.value[memberIndex] = Member(
         attendance.value[memberIndex].id,
         attendance.value[memberIndex].name,
+        attendance.value[memberIndex].titles,
         AttendanceStatus.out,
         location: null,
         privilege: attendance.value[memberIndex].privilege,
@@ -1310,6 +1323,7 @@ class AttendanceTrackerBackend {
       attendance.value[memberIndex] = Member(
         attendance.value[memberIndex].id,
         attendance.value[memberIndex].name,
+        attendance.value[memberIndex].titles,
         AttendanceStatus.present,
         location: location,
         privilege: attendance.value[memberIndex].privilege,
