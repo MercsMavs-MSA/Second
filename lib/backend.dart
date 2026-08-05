@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:flutter/foundation.dart';
 import 'package:second/log_inst.dart';
 import 'package:second/message_board_loader.dart';
 import 'package:second/passwords.dart';
@@ -313,10 +314,13 @@ class AttendanceTrackerBackend {
   static const configSheetName = "LogoutTiming";
   static const configMessagesName = "MessageBoard";
   static const memberSheetContentsRange = "$memberSheetName!A3:G";
+  static const memberSheetContentsRangeWithHeader = "$memberSheetName!A2:L";
   static const memberSheetIdsRange = "$memberSheetName!A3:A";
   static const logSheetContentsRange = "$logSheetName!A3:";
   static const logSheetHeaderRange = "$logSheetName!A2:2";
   static const logSheetHeaderStart = "$logSheetName!A2";
+
+  static const appMembersSchema = ["ID", "BadgeIDs",	"Name", "Nickname",	"Titles", "Groups", "Status", "Location","PasswordHash", "PFP", "Events", "TotalHours"];
 
   ValueNotifier<List<Member>> attendance = ValueNotifier([]);
 
@@ -623,6 +627,35 @@ class AttendanceTrackerBackend {
     }
   }
 
+  List<String> _pullSchema(List<dynamic> header) {
+    List<String> output = [];
+    for (String col in header) {
+      output.add(col.replaceAll(RegExp(r'\s*\([^)]*\)|\s+'), ''));
+    }
+    return output;
+  }
+
+  bool _verifyMemberSchema(List<dynamic> memberSheetEntry) {
+    // TODO: we may need to perform more extensive checks later
+    if (memberSheetEntry.length != AttendanceTrackerBackend.appMembersSchema.length) {
+      logger.w("Member ${memberSheetEntry[0].toString()} contains an unknown field issue, skipping addition");
+      return false;
+    } if (memberSheetEntry[0].toString().isEmpty) {
+      logger.w("Member ${memberSheetEntry[2].toString()} must have a unique ID at column A, skipping addition");
+      return false;
+    } if (memberSheetEntry[2].toString().isEmpty) {
+      logger.w("Member ${memberSheetEntry[0].toString()} must have a name at column C, skipping addition");
+      return false;
+    } if (memberSheetEntry[2].toString().isEmpty) {
+      logger.w("Member ${memberSheetEntry[0].toString()} must have a title at column D (such as Student, Volunteer, Coach), skipping addition");
+      return false;
+    } if (!["Present", "Out"].contains(memberSheetEntry[appMembersSchema.indexOf("Status")].toString())) {
+      logger.w("Member ${memberSheetEntry[0].toString()} must have a status of Present or Out");
+      return false;
+    }
+    return true;
+  }
+
   Future<void> _updateMembers() async {
     if (googleConnected.value != true) {
       return;
@@ -633,7 +666,8 @@ class AttendanceTrackerBackend {
       membersTableResponse = await _sheetsClient?.spreadsheets.values.get(
         _sheetId ?? "",
         valueRenderOption: 'FORMULA', // for representation if =IMAGE() in pfp
-        AttendanceTrackerBackend.memberSheetContentsRange,
+        majorDimension: 'ROWS',
+        AttendanceTrackerBackend.memberSheetContentsRangeWithHeader,
       );
     } on SocketException catch (e) {
       logger.w("Google is down!!! $e");
@@ -653,31 +687,25 @@ class AttendanceTrackerBackend {
       return;
     }
 
+    if (!listEquals(_pullSchema(membersTableResponse.values![0]), AttendanceTrackerBackend.appMembersSchema)) {
+      logger.e("Member sheet header not correct, aborting member update got ${_pullSchema(membersTableResponse.values![0])} expected $appMembersSchema");
+      return;
+    } else {
+      logger.t("Member list header verified");
+      membersTableResponse.values!.removeAt(0);
+    }
+
     // apply members
     List<Member> newMembers = [];
     for (List<dynamic> googleMember in membersTableResponse.values!) {
-      // ID, Name, Privilege, Status, Location
-      if (googleMember.length != 5 &&
-          googleMember.length != 6 &&
-          googleMember.length != 7) {
+      if (!_verifyMemberSchema(googleMember)) {
         // password fields may or may not be present
         logger.w(
-          "Malformed user detected, skipping user addition, expected 5, 6, or 7 fields, got ${googleMember.length}",
+          "Malformed user detected, skipping user addition, schema validation error",
         );
         continue;
       }
-      if (googleMember[0].toString().isEmpty) {
-        logger.w(
-          "Malformed user detected, skipping user addition, ID is empty",
-        );
-        continue;
-      } else if (googleMember[1].toString().isEmpty) {
-        logger.w(
-          "Malformed user detected, skipping user addition, name is empty",
-        );
-        continue;
-      }
-      var parsedPfp = googleMember.elementAtOrNull(6) as String?;
+      var parsedPfp = googleMember.elementAtOrNull(appMembersSchema.indexOf("PFP")) as String?;
       if ((parsedPfp?.startsWith("=IMAGE(\"") ?? false) ||
           (parsedPfp?.startsWith("=image(\"") ?? false)) {
         parsedPfp = parsedPfp?.replaceFirst("=IMAGE(\"", "");
@@ -686,15 +714,15 @@ class AttendanceTrackerBackend {
       }
       newMembers.add(
         Member(
-          int.tryParse(googleMember[0].toString()) ?? -1,
-          googleMember[1] as String,
+          int.tryParse(googleMember[appMembersSchema.indexOf("ID")].toString()) ?? -1,
+          googleMember[appMembersSchema.indexOf("Name")] as String,
           AttendanceStatus.values.byName(
-            (googleMember[3] as String).toLowerCase(),
+            (googleMember[appMembersSchema.indexOf("Status")] as String).toLowerCase(),
           ),
-          location: googleMember[4] as String,
-          passwordHash: googleMember.elementAtOrNull(5) as String?,
-          privilege: Member.privilegeFromName(googleMember[2] as String),
-          pfpUrl: parsedPfp,
+          location: googleMember[appMembersSchema.indexOf("Location")] as String,
+          passwordHash: googleMember.elementAtOrNull(appMembersSchema.indexOf("PasswordHash")) as String?,
+          privilege: MemberPrivilege.admin, // TODO: fix me
+          pfpUrl: (parsedPfp == null || parsedPfp.isEmpty) ? null : parsedPfp,
         ),
       );
     }
