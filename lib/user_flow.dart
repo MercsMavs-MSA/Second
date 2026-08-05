@@ -489,6 +489,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                       child: Center(
                         child: Column(
                           children: [
+                            Text(widget.user.getTitles()?.join(" • ") ?? "Unknown Title, please refresh members", style: Theme.of(context).textTheme.headlineSmall,),
                             Text("ID: ${widget.user.id}"),
                             Spacer(),
                             CircleAvatar(
