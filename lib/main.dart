@@ -346,7 +346,9 @@ class _HomePageState extends State<HomePage>
         if (event.logicalKey == LogicalKeyboardKey.enter) {
           return false;
         } if (event.logicalKey == LogicalKeyboardKey.backspace) {
-          _searchQuery.text = _searchQuery.text.substring(0, _searchQuery.text.length - 1);
+          if (_searchQuery.text.isNotEmpty) {
+            _searchQuery.text = _searchQuery.text.substring(0, _searchQuery.text.length - 1);
+          }
         } else {
           _searchQuery.text = _searchQuery.text + (event.character ?? "");
         }
