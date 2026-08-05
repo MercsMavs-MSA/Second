@@ -25,7 +25,6 @@ import 'package:second/rfid_event.dart';
 import 'package:second/settings.dart';
 import 'package:second/settings_page.dart';
 import 'package:second/state.dart';
-import 'package:second/string_ext.dart';
 import 'package:second/user_flow.dart';
 import 'package:second/util.dart';
 import 'package:second/widgets.dart';
@@ -238,7 +237,7 @@ class _HomePageState extends State<HomePage>
   late CheckoutScheduler _checkoutScheduler;
 
   // name search
-  String _searchQuery = '';
+  final TextEditingController _searchQuery = TextEditingController();
   late ValueNotifier<List<Member>> filteredMembers;
 
   // sorting options
@@ -259,7 +258,7 @@ class _HomePageState extends State<HomePage>
 
   void _updateFilteredMembers() {
     final List<Member> members = _backend.attendance.value.where((member) {
-      return member.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      return member.name.toLowerCase().contains(_searchQuery.text.toLowerCase());
     }).toList();
 
     members.sort((a, b) {
@@ -312,7 +311,7 @@ class _HomePageState extends State<HomePage>
       _backend.attendance.value
           .where(
             (member) =>
-                member.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+                member.name.toLowerCase().contains(_searchQuery.text.toLowerCase()),
           )
           .toList(),
     );
@@ -341,6 +340,20 @@ class _HomePageState extends State<HomePage>
     _rfidHidStreamController = StreamController<RfidEvent>.broadcast();
     _rfidHidStream = _rfidHidStreamController.stream;
     ServicesBinding.instance.keyboard.addHandler((event) {
+      if (event is KeyDownEvent && (widget.settingsManager.getValue<String>("rfid.reader") ??
+          widget.settingsManager.getDefault<String>("rfid.reader")!) ==
+          "disable") {
+        if (event.logicalKey == LogicalKeyboardKey.enter) {
+          return false;
+        } if (event.logicalKey == LogicalKeyboardKey.backspace) {
+          _searchQuery.text = _searchQuery.text.substring(0, _searchQuery.text.length - 1);
+        } else {
+          _searchQuery.text = _searchQuery.text + (event.character ?? "");
+        }
+        _searchQuery.selection = TextSelection.collapsed(offset: _searchQuery.text.length);
+        _updateFilteredMembers();
+        return false;
+      }
       if (event is KeyDownEvent &&
           event.character != null &&
           (widget.settingsManager.getValue<String>("rfid.reader") ??
@@ -1021,6 +1034,7 @@ class _HomePageState extends State<HomePage>
                                   children: [
                                     Expanded(
                                       child: VirtualTextField(
+                                        controller: _searchQuery,
                                         decoration: InputDecoration(
                                           hintText: 'Search name...',
                                           prefixIcon: Icon(Icons.search),
@@ -1031,7 +1045,6 @@ class _HomePageState extends State<HomePage>
                                           ),
                                         ),
                                         onChanged: (value) {
-                                          _searchQuery = value;
                                           _updateFilteredMembers();
                                         },
                                       ),

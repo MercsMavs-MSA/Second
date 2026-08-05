@@ -53,6 +53,7 @@ class VirtualTextField extends StatefulWidget {
   final InputDecoration? decoration;
   final int? maxLines;
   final Function(String)? onChanged;
+  final TextEditingController? controller;
 
   const VirtualTextField({
     super.key,
@@ -62,6 +63,7 @@ class VirtualTextField extends StatefulWidget {
     this.decoration,
     this.maxLines = 1,
     this.onChanged,
+    this.controller,
   });
 
   @override
@@ -71,11 +73,17 @@ class VirtualTextField extends StatefulWidget {
 class _VirtualTextFieldState extends State<VirtualTextField> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
+  bool _isInternalController = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    if (widget.controller == null) {
+      _controller = TextEditingController();
+      _isInternalController = true;
+    } else {
+      _controller = widget.controller!;
+    }
     _focusNode = FocusNode();
 
     // Listen to virtual key events
@@ -85,11 +93,30 @@ class _VirtualTextFieldState extends State<VirtualTextField> {
   }
 
   @override
+  void didUpdateWidget(covariant VirtualTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      if (_isInternalController) {
+        _controller.dispose();
+      }
+      if (widget.controller == null) {
+        _controller = TextEditingController();
+        _isInternalController = true;
+      } else {
+        _controller = widget.controller!;
+        _isInternalController = false;
+      }
+    }
+  }
+
+  @override
   void dispose() {
     VirtualKeyEventBus.instance.keyEventNotifier.removeListener(
       _onVirtualKeyEvent,
     );
-    _controller.dispose();
+    if (_isInternalController) {
+      _controller.dispose();
+    }
     _focusNode.dispose();
     super.dispose();
   }
@@ -129,7 +156,7 @@ class _VirtualTextFieldState extends State<VirtualTextField> {
         }
         break;
       default:
-        // Insert the character
+      // Insert the character
         final text = _controller.text;
         final newText = text + key.key;
         _controller.value = TextEditingValue(text: newText);
@@ -145,7 +172,7 @@ class _VirtualTextFieldState extends State<VirtualTextField> {
       style: widget.style,
       maxLines: widget.maxLines,
       decoration:
-          widget.decoration ??
+      widget.decoration ??
           InputDecoration(
             hintText: widget.hintText,
             border: const OutlineInputBorder(),
@@ -158,7 +185,6 @@ class _VirtualTextFieldState extends State<VirtualTextField> {
     );
   }
 }
-
 // Key data model with caching support
 class KeyData {
   final String type;
