@@ -8,9 +8,13 @@ import 'package:second/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-bool filterTarget(String role, String id, List<String> targets) {
-  if (targets.contains(role) || targets.isEmpty) {
-    return true;
+bool filterTarget(Iterable<String>? groups, String id, List<String> targets) {
+  if ((groups??[]).contains("skip-messageboard")) {return false;}
+
+  for (final group in groups ?? []) {
+    if (targets.contains(group) || targets.isEmpty) {
+      return true;
+    }
   }
   for (final target in targets) {
     if (Glob(target).matches(id)) {
@@ -21,13 +25,13 @@ bool filterTarget(String role, String id, List<String> targets) {
 }
 
 List<MessageBoardEntry> myMessages(
-  String role,
+  Iterable<String>? groups,
   String id,
   List<MessageBoardEntry> entries,
 ) {
   List<MessageBoardEntry> newEntries = [];
   for (final entry in entries) {
-    if (filterTarget(role, id, entry.targets)) {
+    if (filterTarget(groups, id, entry.targets)) {
       newEntries.add(entry);
     }
   }
@@ -372,14 +376,14 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
           ? _buildPinEntry(context)
           : !_readMessages &&
                 myMessages(
-                  "",
+                  widget.user.getGroups(),
                   widget.user.id.toString(),
                   widget.backend.messageTable?.entries.value ?? [],
                 ).isNotEmpty
           ? Builder(
               builder: (context) {
                 final entry = myMessages(
-                  "",
+                  widget.user.getGroups(),
                   widget.user.id.toString(),
                   widget.backend.messageTable?.entries.value ?? [],
                 )[_page];
@@ -433,7 +437,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                   _isMessageTimeoutCanceled = false;
                                   if (_page <
                                       myMessages(
-                                            "",
+                                        widget.user.getGroups(),
                                             widget.user.id.toString(),
                                             widget
                                                     .backend
@@ -483,7 +487,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                         _isMessageTimeoutCanceled = false;
                                         if (_page <
                                             myMessages(
-                                                  "",
+                                              widget.user.getGroups(),
                                                   widget.user.id.toString(),
                                                   widget
                                                           .backend
@@ -502,7 +506,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                     child: Text(
                                       (_page <
                                               myMessages(
-                                                    "",
+                                                widget.user.getGroups(),
                                                     widget.user.id.toString(),
                                                     widget
                                                             .backend
