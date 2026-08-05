@@ -1131,6 +1131,16 @@ class _HomePageState extends State<HomePage>
                                     return ValueListenableBuilder(
                                       valueListenable: filteredMembers,
                                       builder: (context, filterValue, child) {
+                                        if (filterValue.isEmpty) {
+                                          return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.no_accounts, size: 128, color: Theme.of(context).colorScheme.primaryFixedDim,),
+                                              Text("No members found matching the search criteria, scan your badge if you are unlisted")
+                                            ],
+                                          );
+                                        }
                                         return ListView.builder(
                                           itemCount: filterValue.length,
                                           itemBuilder: (context, index) {
