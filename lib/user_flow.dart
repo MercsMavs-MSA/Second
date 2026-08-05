@@ -20,12 +20,15 @@ bool filterTarget(String role, String id, List<String> targets) {
   return false;
 }
 
-List<MessageBoardEntry> myMessages(String role, String id, List<MessageBoardEntry> entries) {
+List<MessageBoardEntry> myMessages(
+  String role,
+  String id,
+  List<MessageBoardEntry> entries,
+) {
   List<MessageBoardEntry> newEntries = [];
   for (final entry in entries) {
     if (filterTarget(role, id, entry.targets)) {
       newEntries.add(entry);
-
     }
   }
   return newEntries;
@@ -331,15 +334,55 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         title: Text(widget.user.name),
+        actions: [
+          IconButton(
+            onPressed: () {
+              isTimerRunning.value = false;
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text(widget.user.name),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("ID: ${widget.user.id}"),
+                        Text("Status: ${widget.user.status}"),
+                        Text("Current Location: ${widget.user.location}"),
+                        Text("Titles: ${widget.user.getTitles()}"),
+                        Text("Groups: ${widget.user.getGroups()}"),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            icon: Icon(Icons.info),
+          ),
+        ],
       ),
       body: !widget.fromRfid && !_isPinVerified && widget.requirePinEntry
           ? _buildPinEntry(context)
           : !_readMessages &&
-          myMessages("", widget.user.id.toString(), widget.backend.messageTable?.entries.value ?? []).isNotEmpty
+                myMessages(
+                  "",
+                  widget.user.id.toString(),
+                  widget.backend.messageTable?.entries.value ?? [],
+                ).isNotEmpty
           ? Builder(
               builder: (context) {
-                final entry =
-                    myMessages("", widget.user.id.toString(), widget.backend.messageTable?.entries.value ?? [])[_page];
+                final entry = myMessages(
+                  "",
+                  widget.user.id.toString(),
+                  widget.backend.messageTable?.entries.value ?? [],
+                )[_page];
                 return GestureDetector(
                   onTapDown: (x) {
                     setState(() {
@@ -389,13 +432,16 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                 setState(() {
                                   _isMessageTimeoutCanceled = false;
                                   if (_page <
-                                      myMessages("", widget.user.id.toString(), widget
-                                                      .backend
-                                                      .messageTable
-                                                      ?.entries
-                                                      .value ??
-                                                  [])
-                                              .length -
+                                      myMessages(
+                                            "",
+                                            widget.user.id.toString(),
+                                            widget
+                                                    .backend
+                                                    .messageTable
+                                                    ?.entries
+                                                    .value ??
+                                                [],
+                                          ).length -
                                           1) {
                                     _page += 1;
                                   } else {
@@ -436,13 +482,16 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                       setState(() {
                                         _isMessageTimeoutCanceled = false;
                                         if (_page <
-                                            myMessages("", widget.user.id.toString(), widget
-                                                            .backend
-                                                            .messageTable
-                                                            ?.entries
-                                                            .value ??
-                                                        [])
-                                                    .length -
+                                            myMessages(
+                                                  "",
+                                                  widget.user.id.toString(),
+                                                  widget
+                                                          .backend
+                                                          .messageTable
+                                                          ?.entries
+                                                          .value ??
+                                                      [],
+                                                ).length -
                                                 1) {
                                           _page += 1;
                                         } else {
@@ -452,13 +501,16 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                     },
                                     child: Text(
                                       (_page <
-                                              myMessages("", widget.user.id.toString(), widget
-                                                              .backend
-                                                              .messageTable
-                                                              ?.entries
-                                                              .value ??
-                                                          [])
-                                                      .length -
+                                              myMessages(
+                                                    "",
+                                                    widget.user.id.toString(),
+                                                    widget
+                                                            .backend
+                                                            .messageTable
+                                                            ?.entries
+                                                            .value ??
+                                                        [],
+                                                  ).length -
                                                   1)
                                           ? "Next"
                                           : "Done",
@@ -489,7 +541,11 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                       child: Center(
                         child: Column(
                           children: [
-                            Text(widget.user.getTitles()?.join(" • ") ?? "Unknown Title, please refresh members", style: Theme.of(context).textTheme.headlineSmall,),
+                            Text(
+                              widget.user.getTitles()?.join(" • ") ??
+                                  "Unknown Title, please refresh members",
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
                             Text("ID: ${widget.user.id}"),
                             Spacer(),
                             CircleAvatar(

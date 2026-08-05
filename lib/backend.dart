@@ -129,6 +129,13 @@ class Member {
     return titles.split(",").map((s){return s.trim();});
   }
 
+  Iterable<String>? getGroups() {
+    if (groups.isEmpty) {
+      return null;
+    }
+    return groups.split(",").map((s){return s.trim();});
+  }
+
   @override
   String toString() {
     return 'Member{id: $id, name: $name, titles: $titles, status: $status, location: $location, groups: $groups, passwordHash: $passwordHash}';
