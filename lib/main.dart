@@ -258,13 +258,13 @@ class _HomePageState extends State<HomePage>
 
   void _updateFilteredMembers() {
     final List<Member> members = _backend.attendance.value.where((member) {
-      return member.name.toLowerCase().contains(_searchQuery.text.toLowerCase()) && !member.groups.contains("unlisted");
+      return member.getVisualName().toLowerCase().contains(_searchQuery.text.toLowerCase()) && !member.groups.contains("unlisted");
     }).toList();
 
     members.sort((a, b) {
       int result;
       if (_sortCriteria == 'name') {
-        result = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        result = a.getVisualName().toLowerCase().compareTo(b.getVisualName().toLowerCase());
       } else {
         // Status sort: present vs out
         // In backend.dart, AttendanceStatus is: enum AttendanceStatus { present, out }
@@ -311,7 +311,7 @@ class _HomePageState extends State<HomePage>
       _backend.attendance.value
           .where(
             (member) =>
-                member.name.toLowerCase().contains(_searchQuery.text.toLowerCase()),
+                member.getVisualName().toLowerCase().contains(_searchQuery.text.toLowerCase()),
           )
           .toList(),
     );
@@ -1164,7 +1164,7 @@ class _HomePageState extends State<HomePage>
                                                             builder: (context) {
                                                               List<String>
                                                               nameParts = member
-                                                                  .name
+                                                                  .getVisualName()
                                                                   .split(' ');
                                                               nameParts
                                                                   .removeWhere(
@@ -1208,7 +1208,7 @@ class _HomePageState extends State<HomePage>
                                                   ),
                                                 ],
                                               ),
-                                              title: Text(member.name),
+                                              title: Text(member.getVisualName()),
                                               subtitle: Text(
                                                 member.getTitles()?.join(" · ") ?? "Error loading title, please refresh members",
                                               ),
@@ -1226,7 +1226,7 @@ class _HomePageState extends State<HomePage>
                                                     builder: (context) {
                                                       return AlertDialog(
                                                         title: Text(
-                                                          member.name,
+                                                          member.getVisualName(),
                                                         ),
                                                         content: Column(
                                                           mainAxisSize:

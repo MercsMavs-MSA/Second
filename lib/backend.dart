@@ -105,6 +105,7 @@ class CachedQueue<T> {
 class Member {
   final int id;
   final String name;
+  final String? nickname;
   final AttendanceStatus status;
   final String? location;
   final String? passwordHash;
@@ -114,6 +115,7 @@ class Member {
   Member(
     this.id,
     this.name,
+    this.nickname,
     this.titles,
     this.groups,
     this.status, {
@@ -136,6 +138,13 @@ class Member {
     return groups.split(",").map((s){return s.trim();});
   }
 
+  String getVisualName() {
+    if (nickname == null) {
+      return name;
+    }
+    return nickname!;
+  }
+
   @override
   String toString() {
     return 'Member{id: $id, name: $name, titles: $titles, status: $status, location: $location, groups: $groups, passwordHash: $passwordHash}';
@@ -145,6 +154,7 @@ class Member {
     return {
       'id': id,
       'name': name,
+      'nickname': nickname,
       'titles': titles,
       'groups': groups,
       'status': status.name,
@@ -160,6 +170,7 @@ class Member {
           ? data['id'] as int
           : int.tryParse(data['id'].toString()) ?? -1,
       data['name'] as String,
+      data['nickname'] as String?,
       (data['titles'] as String? ?? "Error loading title, please refresh members"),
       (data['groups'] as String? ?? ""),
       AttendanceStatus.values.byName((data['status'] as String).toLowerCase()),
@@ -723,6 +734,7 @@ class AttendanceTrackerBackend {
         Member(
           int.tryParse(googleMember[appMembersSchema.indexOf("ID")].toString()) ?? -1,
           googleMember[appMembersSchema.indexOf("Name")] as String,
+          (googleMember[appMembersSchema.indexOf("Nickname")] as String) == '' ? null : (googleMember[appMembersSchema.indexOf("Nickname")] as String),
           googleMember[appMembersSchema.indexOf("Titles")] as String,
           googleMember[appMembersSchema.indexOf("Groups")] as String,
           AttendanceStatus.values.byName(
@@ -1281,6 +1293,7 @@ class AttendanceTrackerBackend {
       attendance.value[memberIndex] = Member(
         attendance.value[memberIndex].id,
         attendance.value[memberIndex].name,
+        attendance.value[memberIndex].nickname,
         attendance.value[memberIndex].titles,
         attendance.value[memberIndex].groups,
         AttendanceStatus.out,
@@ -1319,6 +1332,7 @@ class AttendanceTrackerBackend {
       attendance.value[memberIndex] = Member(
         attendance.value[memberIndex].id,
         attendance.value[memberIndex].name,
+        attendance.value[memberIndex].nickname,
         attendance.value[memberIndex].titles,
         attendance.value[memberIndex].groups,
         AttendanceStatus.present,

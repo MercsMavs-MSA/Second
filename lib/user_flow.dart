@@ -328,7 +328,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
           foregroundColor: Theme.of(context).colorScheme.onSurface,
-          title: Text(widget.user.name),
+          title: Text(widget.user.getVisualName()),
         ),
         body: _buildPinSetter(context),
       );
@@ -337,7 +337,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
-        title: Text(widget.user.name),
+        title: Text(widget.user.getVisualName()),
         actions: [
           IconButton(
             onPressed: () {
@@ -352,6 +352,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text("ID: ${widget.user.id}"),
+                        Text("Nickname: ${widget.user.nickname}"),
                         Text("Status: ${widget.user.status}"),
                         Text("Current Location: ${widget.user.location}"),
                         Text("Titles: ${widget.user.getTitles()}"),
