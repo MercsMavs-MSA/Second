@@ -335,11 +335,11 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
       body: !widget.fromRfid && !_isPinVerified && widget.requirePinEntry
           ? _buildPinEntry(context)
           : !_readMessages &&
-          myMessages(widget.user.privilege.name.toUpperCase(), widget.user.id.toString(), widget.backend.messageTable?.entries.value ?? []).isNotEmpty
+          myMessages("", widget.user.id.toString(), widget.backend.messageTable?.entries.value ?? []).isNotEmpty
           ? Builder(
               builder: (context) {
                 final entry =
-                    myMessages(widget.user.privilege.name.toUpperCase(), widget.user.id.toString(), widget.backend.messageTable?.entries.value ?? [])[_page];
+                    myMessages("", widget.user.id.toString(), widget.backend.messageTable?.entries.value ?? [])[_page];
                 return GestureDetector(
                   onTapDown: (x) {
                     setState(() {
@@ -389,7 +389,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                 setState(() {
                                   _isMessageTimeoutCanceled = false;
                                   if (_page <
-                                      myMessages(widget.user.privilege.name.toUpperCase(), widget.user.id.toString(), widget
+                                      myMessages("", widget.user.id.toString(), widget
                                                       .backend
                                                       .messageTable
                                                       ?.entries
@@ -436,7 +436,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                       setState(() {
                                         _isMessageTimeoutCanceled = false;
                                         if (_page <
-                                            myMessages(widget.user.privilege.name.toUpperCase(), widget.user.id.toString(), widget
+                                            myMessages("", widget.user.id.toString(), widget
                                                             .backend
                                                             .messageTable
                                                             ?.entries
@@ -452,7 +452,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                                     },
                                     child: Text(
                                       (_page <
-                                              myMessages(widget.user.privilege.name.toUpperCase(), widget.user.id.toString(), widget
+                                              myMessages("", widget.user.id.toString(), widget
                                                               .backend
                                                               .messageTable
                                                               ?.entries

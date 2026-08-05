@@ -668,28 +668,7 @@ class _HomePageState extends State<HomePage>
               widget.settingsManager.getValue<String>('station.location') ??
               "Shop",
           fromRfid: fromRfid,
-          requirePinEntry:
-              (user.privilege == MemberPrivilege.admin &&
-                  (widget.settingsManager.getValue<bool>(
-                        "security.pin.require.admin",
-                      ) ??
-                      widget.settingsManager.getDefault<bool>(
-                        "security.pin.require.admin",
-                      )!) ||
-              user.privilege == MemberPrivilege.mentor &&
-                  (widget.settingsManager.getValue<bool>(
-                        "security.pin.require.mentor",
-                      ) ??
-                      widget.settingsManager.getDefault<bool>(
-                        "security.pin.require.mentor",
-                      )!) ||
-              user.privilege == MemberPrivilege.student &&
-                  (widget.settingsManager.getValue<bool>(
-                        "security.pin.require.student",
-                      ) ??
-                      widget.settingsManager.getDefault<bool>(
-                        "security.pin.require.student",
-                      )!)),
+          requirePinEntry: user.groups.contains("require-pin"),
         ),
       ),
     ).then((_) {

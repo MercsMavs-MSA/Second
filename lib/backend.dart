@@ -11,7 +11,6 @@ import 'package:second/passwords.dart';
 import 'package:second/settings.dart';
 import 'package:second/string_ext.dart';
 import 'package:second/util.dart';
-import 'package:flutter/material.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
@@ -20,8 +19,6 @@ import 'package:logger/logger.dart';
 import 'config_table.dart';
 
 enum AttendanceStatus { present, out }
-
-enum MemberPrivilege { admin, student, mentor, custom }
 
 enum MemberLoggerAction { created, checkIn, checkOut, checkOutAuto, disabled, error }
 
@@ -112,16 +109,16 @@ class Member {
   final String? location;
   final String? passwordHash;
   final String titles;
-  final MemberPrivilege privilege;
+  final String groups;
   final String? pfpUrl;
   Member(
     this.id,
     this.name,
     this.titles,
+    this.groups,
     this.status, {
     this.location,
     this.passwordHash,
-    this.privilege = MemberPrivilege.student,
     this.pfpUrl,
   });
 
@@ -134,7 +131,7 @@ class Member {
 
   @override
   String toString() {
-    return 'Member{id: $id, name: $name, status: $status, location: $location, privilege: $privilege, passwordHash: $passwordHash}';
+    return 'Member{id: $id, name: $name, titles: $titles, status: $status, location: $location, groups: $groups, passwordHash: $passwordHash}';
   }
 
   Map<String, dynamic> toMap() {
@@ -142,20 +139,12 @@ class Member {
       'id': id,
       'name': name,
       'titles': titles,
+      'groups': groups,
       'status': status.name,
       'location': location,
-      'privilege': privilege.name,
       'passwordHash': passwordHash,
       'pfp': pfpUrl,
     };
-  }
-
-  static MemberPrivilege privilegeFromName(String name) {
-    return MemberPrivilege.values.cast<MemberPrivilege?>().firstWhere(
-          (e) => e!.name == name.toLowerCase(),
-          orElse: () => MemberPrivilege.custom,
-        ) ??
-        MemberPrivilege.custom;
   }
 
   static Member fromMap(Map<String, dynamic> data) {
@@ -165,10 +154,10 @@ class Member {
           : int.tryParse(data['id'].toString()) ?? -1,
       data['name'] as String,
       (data['titles'] as String? ?? "Error loading title, please refresh members"),
+      (data['groups'] as String? ?? ""),
       AttendanceStatus.values.byName((data['status'] as String).toLowerCase()),
       location: data['location'] as String?,
       passwordHash: data['passwordHash'] as String?,
-      privilege: privilegeFromName(data['privilege'] as String),
       pfpUrl: data["pfpUrl"] as String?,
     );
   }
@@ -728,12 +717,12 @@ class AttendanceTrackerBackend {
           int.tryParse(googleMember[appMembersSchema.indexOf("ID")].toString()) ?? -1,
           googleMember[appMembersSchema.indexOf("Name")] as String,
           googleMember[appMembersSchema.indexOf("Titles")] as String,
+          googleMember[appMembersSchema.indexOf("Groups")] as String,
           AttendanceStatus.values.byName(
             (googleMember[appMembersSchema.indexOf("Status")] as String).toLowerCase(),
           ),
           location: googleMember[appMembersSchema.indexOf("Location")] as String,
           passwordHash: googleMember.elementAtOrNull(appMembersSchema.indexOf("PasswordHash")) as String?,
-          privilege: MemberPrivilege.admin, // TODO: fix me
           pfpUrl: (parsedPfp == null || parsedPfp.isEmpty) ? null : parsedPfp,
         ),
       );
@@ -1286,9 +1275,9 @@ class AttendanceTrackerBackend {
         attendance.value[memberIndex].id,
         attendance.value[memberIndex].name,
         attendance.value[memberIndex].titles,
+        attendance.value[memberIndex].groups,
         AttendanceStatus.out,
         location: null,
-        privilege: attendance.value[memberIndex].privilege,
         passwordHash: attendance.value[memberIndex].passwordHash,
         pfpUrl: attendance.value[memberIndex].pfpUrl,
       );
@@ -1324,9 +1313,9 @@ class AttendanceTrackerBackend {
         attendance.value[memberIndex].id,
         attendance.value[memberIndex].name,
         attendance.value[memberIndex].titles,
+        attendance.value[memberIndex].groups,
         AttendanceStatus.present,
         location: location,
-        privilege: attendance.value[memberIndex].privilege,
         passwordHash: attendance.value[memberIndex].passwordHash,
         pfpUrl: attendance.value[memberIndex].pfpUrl,
       );
