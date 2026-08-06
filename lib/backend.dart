@@ -868,7 +868,7 @@ class AttendanceTrackerBackend {
         if (index == -1) continue; // skip if ID not found
 
         final row = index + 3;
-        final range = '${memberSheetContentsRange.split("!").first}!D$row';
+        final range = '${memberSheetContentsRange.split("!").first}!G$row';
         updates.add(
           ValueRange(
             range: range,
@@ -891,7 +891,7 @@ class AttendanceTrackerBackend {
         final index = memberIds.indexOf(memberId);
         if (index == -1) continue;
         final row = index + 3;
-        final range = '${memberSheetContentsRange.split("!").first}!F$row';
+        final range = '${memberSheetContentsRange.split("!").first}!I$row';
         updates.add(
           ValueRange(
             range: range,

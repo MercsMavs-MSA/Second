@@ -261,18 +261,20 @@ class _HomePageState extends State<HomePage>
       return member.getVisualName().toLowerCase().contains(_searchQuery.text.toLowerCase()) && !member.groups.contains("unlisted");
     }).toList();
 
-    members.sort((a, b) {
-      int result;
-      if (_sortCriteria == 'name') {
-        result = a.getVisualName().toLowerCase().compareTo(b.getVisualName().toLowerCase());
-      } else {
-        // Status sort: present vs out
-        // In backend.dart, AttendanceStatus is: enum AttendanceStatus { present, out }
-        // present.index = 0, out.index = 1
-        result = a.status.index.compareTo(b.status.index);
-      }
-      return _sortAscending ? result : -result;
-    });
+    if (_sortCriteria != 'none') {
+      members.sort((a, b) {
+        int result;
+        if (_sortCriteria == 'name') {
+          result = a.getVisualName().toLowerCase().compareTo(b.getVisualName().toLowerCase());
+        } else {
+          // Status sort: present vs out
+          // In backend.dart, AttendanceStatus is: enum AttendanceStatus { present, out }
+          // present.index = 0, out.index = 1
+          result = a.status.index.compareTo(b.status.index);
+        }
+        return _sortAscending ? result : -result;
+      });
+    }
 
     filteredMembers.value = members;
   }
@@ -1048,6 +1050,9 @@ class _HomePageState extends State<HomePage>
                                           } else if (value == 'status_desc') {
                                             _sortCriteria = 'status';
                                             _sortAscending = false;
+                                          } else if (value == 'none') {
+                                            _sortCriteria = 'none';
+                                            _sortAscending = false;
                                           }
                                           _updateFilteredMembers();
                                         });
@@ -1105,6 +1110,19 @@ class _HomePageState extends State<HomePage>
                                               Spacer(),
                                               if (_sortCriteria == "status" &&
                                                   !_sortAscending)
+                                                Icon(Icons.check),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem(
+                                          value: 'none',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.filter_alt_off),
+                                              SizedBox(width: 8),
+                                              Text('Do Not Sort'),
+                                              Spacer(),
+                                              if (_sortCriteria == "none")
                                                 Icon(Icons.check),
                                             ],
                                           ),
