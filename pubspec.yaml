@@ -109,3 +109,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  fonts:
+    - family: GoogleSansFlex
+      fonts:
+        - asset: "assets/fonts/Google_Sans_Flex/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf"
+    - family: GoogleSansCode
+      fonts:
+        - asset: "assets/fonts/Google_Sans_Code/GoogleSansCode-VariableFont_MONO,wght.ttf"

@@ -10,7 +10,6 @@ import 'package:second/message_board_loader.dart';
 import 'package:second/passwords.dart';
 import 'package:second/settings.dart';
 import 'package:second/string_ext.dart';
-import 'package:second/util.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
@@ -328,15 +327,12 @@ class AdjustableRestartableTimer {
 
 class AttendanceTrackerBackend {
   static const memberSheetName = "Members";
-  static const logSheetName = "Log";
+  static const logSheetName = "INTERNAL.Log";
   static const configSheetName = "LogoutTiming";
   static const configMessagesName = "MessageBoard";
   static const memberSheetContentsRange = "$memberSheetName!A3:G";
   static const memberSheetContentsRangeWithHeader = "$memberSheetName!A2:L";
   static const memberSheetIdsRange = "$memberSheetName!A3:A";
-  static const logSheetContentsRange = "$logSheetName!A3:";
-  static const logSheetHeaderRange = "$logSheetName!A2:2";
-  static const logSheetHeaderStart = "$logSheetName!A2";
 
   static const appMembersSchema = ["ID", "BadgeIDs",	"Name", "Nickname",	"Titles", "Groups", "Status", "Location","PasswordHash", "PFP", "Events", "TotalHours"];
 
@@ -937,323 +933,47 @@ class AttendanceTrackerBackend {
   }
 
   Future<void> _updateLog() async {
-    if (googleConnected.value != true) {
+    if (googleConnected.value != true || _logQueue.isEmpty) {
       return;
     }
 
-    // fetch log header
-    ValueRange? header;
+    // Get current snapshot of queue entries without removing them yet
+    final entriesToSync = _logQueue.toList();
+
+    final List<List<dynamic>> rowsToAppend = entriesToSync.map((entry) {
+      return [
+        entry.memberId,
+        entry.memberId,
+        "=EPOCHTODATE(${entry.time.toUtc().millisecondsSinceEpoch}, 2)",
+        entry.location,
+        entry.action.name.toUpperCase(),
+      ];
+    }).toList();
+
+    final valueRange = ValueRange(values: rowsToAppend);
+
     try {
-      header = await _sheetsClient?.spreadsheets.values.get(
+      await _sheetsClient?.spreadsheets.values.append(
+        valueRange,
         _sheetId ?? "",
-        AttendanceTrackerBackend.logSheetHeaderRange,
+        logSheetName,
+        valueInputOption: "USER_ENTERED",
+        insertDataOption: "INSERT_ROWS",
       );
+
+      // Safely pop entries from the CachedQueue one by one to trigger cache updates
+      for (var i = 0; i < entriesToSync.length; i++) {
+        _logQueue.removeFirst();
+      }
     } on SocketException catch (e) {
       logger.w("Google is down!!! $e");
       googleConnected.value = false;
-      return;
     } on TimeoutException catch (e) {
       logger.w("Google is down with timeout!!! $e");
       googleConnected.value = false;
-      return;
     } on DetailedApiRequestError catch (e) {
       logger.w("Google is down with error!!! $e");
       googleConnected.value = false;
-      return;
-    }
-
-    if (header?.values == null) {
-      // construct header from members
-      await _waitUntilMembersLoaded();
-      List<List<String>> newMemberHeader = [[], [], []];
-      for (final member in attendance.value) {
-        newMemberHeader[0].add(member.id.toString());
-        newMemberHeader[0].add(member.name);
-        newMemberHeader[0].add(
-          "=MAX(FILTER(ROW(${columnToReference(newMemberHeader[0].length - 1)}3:${columnToReference(newMemberHeader[0].length + 1)}), BYROW(${columnToReference(newMemberHeader[0].length - 1)}3:${columnToReference(newMemberHeader[0].length + 1)}, LAMBDA(r, COUNTA(r) > 0))))",
-        );
-        newMemberHeader[0].add("");
-        newMemberHeader[1].add("Timestamp");
-        newMemberHeader[1].add("Location");
-        newMemberHeader[1].add("Action");
-        newMemberHeader[1].add("");
-        newMemberHeader[2].add(
-          "=EPOCHTODATE(${DateTime.now().toUtc().millisecondsSinceEpoch}, 2)",
-        );
-        newMemberHeader[2].add("NULL");
-        newMemberHeader[2].add("CREATED");
-        newMemberHeader[2].add("");
-      }
-      try {
-        await _sheetsClient?.spreadsheets.values.update(
-          ValueRange(
-            values: newMemberHeader,
-            range: AttendanceTrackerBackend.logSheetHeaderStart,
-          ),
-          _sheetId!,
-          AttendanceTrackerBackend.logSheetHeaderStart,
-          valueInputOption: "USER_ENTERED",
-        );
-      } on SocketException catch (e) {
-        logger.w("Google is down!!! $e");
-        googleConnected.value = false;
-        return;
-      } on TimeoutException catch (e) {
-        logger.w("Google is down with timeout!!! $e");
-        googleConnected.value = false;
-        return;
-      } on DetailedApiRequestError catch (e) {
-        logger.w("Google is down with error!!! $e");
-        googleConnected.value = false;
-        return;
-      }
-      // TODO: this can be updated in-memory without a request
-      // fetch log header
-      try {
-        header = await _sheetsClient?.spreadsheets.values.get(
-          _sheetId ?? "",
-          AttendanceTrackerBackend.logSheetHeaderRange,
-        );
-      } on SocketException catch (e) {
-        logger.w("Google is down!!! $e");
-        googleConnected.value = false;
-        return;
-      } on TimeoutException catch (e) {
-        logger.w("Google is down with timeout!!! $e");
-        googleConnected.value = false;
-        return;
-      } on DetailedApiRequestError catch (e) {
-        logger.w("Google is down with error!!! $e");
-        googleConnected.value = false;
-        return;
-      }
-    } else {
-      // format: ID, Name, " ", " ", ...
-      // get remote ids
-      List<int> remoteIds = [];
-      for (int i = 0; i < (header?.values?[0].length ?? 0); i += 4) {
-        final intId = int.tryParse(header?.values?[0][i].toString() ?? "");
-        if (intId == null) {
-          continue;
-        }
-        remoteIds.add(intId);
-      }
-
-      // now, check if there are different local ids than remote ids (must sync)
-      List<int> mustSyncIds = [];
-      for (final localId in attendance.value.map((member) => member.id)) {
-        if (!remoteIds.contains(localId)) {
-          mustSyncIds.add(localId);
-        }
-      }
-
-      String nextUpdateRef = columnToReference(
-        (header?.values?[0].length ?? 0) +
-            2, // index at 1, 2 extra for space and next col
-      );
-      int nextRefUpdateIndex = (header?.values?[0].length ?? 0) + 2;
-
-      List<ValueRange> headerUpdates = [];
-
-      for (final syncId in mustSyncIds) {
-        List<List<String>> newMemberLog = [
-          [
-            syncId.toString(),
-            getMemberById(syncId).name,
-            "=MAX(FILTER(ROW(${columnToReference(nextRefUpdateIndex)}3:${columnToReference(nextRefUpdateIndex + 2)}), BYROW(${columnToReference(nextRefUpdateIndex)}3:${columnToReference(nextRefUpdateIndex + 2)}, LAMBDA(r, COUNTA(r) > 0))))",
-          ],
-          ["Timestamp", "Location", "Action"],
-          [
-            "=EPOCHTODATE(${DateTime.now().toUtc().millisecondsSinceEpoch}, 2)",
-            "NULL",
-            "CREATED",
-          ],
-        ];
-
-        final origin = "$logSheetName!${nextUpdateRef}2"; // starting cell
-        headerUpdates.add(ValueRange(range: origin, values: newMemberLog));
-
-        nextRefUpdateIndex += 4;
-        nextUpdateRef = columnToReference(nextRefUpdateIndex);
-      }
-
-      // expand if needed
-      Spreadsheet? sheetMetadata;
-      try {
-        sheetMetadata = await _sheetsClient!.spreadsheets.get(
-          _sheetId!,
-          ranges: [logSheetName],
-        );
-      } on SocketException catch (e) {
-        logger.w("Google is down!!! $e");
-        googleConnected.value = false;
-        return;
-      } on TimeoutException catch (e) {
-        logger.w("Google is down with timeout!!! $e");
-        googleConnected.value = false;
-        return;
-      } on DetailedApiRequestError catch (e) {
-        logger.w("Google is down with error!!! $e");
-        googleConnected.value = false;
-        return;
-      }
-
-      final sheetProps = sheetMetadata.sheets!
-          .firstWhere((s) => s.properties!.title == logSheetName)
-          .properties!;
-      final currentCols = sheetProps.gridProperties!.columnCount!;
-
-      if (nextRefUpdateIndex > currentCols) {
-        final resizeRequest = BatchUpdateSpreadsheetRequest(
-          requests: [
-            Request(
-              updateSheetProperties: UpdateSheetPropertiesRequest(
-                properties: SheetProperties(
-                  sheetId: sheetProps.sheetId,
-                  gridProperties: GridProperties(
-                    columnCount: nextRefUpdateIndex,
-                  ),
-                ),
-                fields: 'gridProperties.columnCount',
-              ),
-            ),
-          ],
-        );
-        await _sheetsClient!.spreadsheets.batchUpdate(resizeRequest, _sheetId!);
-      }
-
-      final batchRequest = BatchUpdateValuesRequest(
-        valueInputOption: 'USER_ENTERED',
-        data: headerUpdates,
-      );
-
-      // send
-      try {
-        await _sheetsClient?.spreadsheets.values.batchUpdate(
-          batchRequest,
-          _sheetId ?? "",
-        );
-      } on SocketException catch (e) {
-        logger.w("Google is down!!! $e");
-        googleConnected.value = false;
-        return;
-      } on TimeoutException catch (e) {
-        logger.w("Google is down with timeout!!! $e");
-        googleConnected.value = false;
-        return;
-      } on DetailedApiRequestError catch (e) {
-        logger.w("Google is down with error!!! $e");
-        googleConnected.value = false;
-        return;
-      }
-
-      // update logs
-      List<ValueRange> logUpdates = [];
-      List<MemberLogEntry> toRemove = [];
-
-      // get log counts WITHOUT making tons of API requests
-      // Log lengths are calculated on Google's end by using a formula in the header
-      // ex: =MAX(FILTER(ROW(A3:C), BYROW(A3:C, LAMBDA(r, COUNTA(r) > 0))))
-      int maxRowNeeded = 0; // Track the deepest row we need to write
-
-      for (final entry in _logQueue.toList()) {
-        final startCol =
-            header?.values?[0]
-                .map((element) => element.toString())
-                .toList(growable: false)
-                .indexOf(entry.memberId.toString()) ??
-            -2 + 1;
-        if (startCol == -1) {
-          logger.e(
-            "User ID ${entry.memberId} not found in logs!!! Cancelling update",
-          );
-          return;
-        }
-
-        final memberEntriesBefore = _logQueue
-            .toList()
-            .sublist(0, _logQueue.toList().indexOf(entry))
-            .where((e) => e.memberId == entry.memberId)
-            .length;
-
-        final safeNextLogRow =
-            memberEntriesBefore +
-            (int.tryParse((header?.values?[0][startCol + 2]).toString()) ??
-                -2) +
-            1;
-
-        if (safeNextLogRow == -1) {
-          logger.e(
-            "Something is wrong with the log count for user ${entry.memberId}!!! Check the log header for errors. Cancelling update.",
-          );
-          return;
-        }
-
-        maxRowNeeded = safeNextLogRow > maxRowNeeded
-            ? safeNextLogRow
-            : maxRowNeeded;
-
-        final logOrigin =
-            "$logSheetName!${columnToReference(startCol + 1)}$safeNextLogRow";
-        logUpdates.add(
-          ValueRange(
-            range: logOrigin,
-            values: [
-              [
-                "=EPOCHTODATE(${entry.time.toUtc().millisecondsSinceEpoch}, 2)",
-                entry.location,
-                entry.action.name.toUpperCase(),
-              ],
-            ],
-          ),
-        );
-        logger.t("Updated entry: $entry");
-        toRemove.add(entry);
-      }
-
-      final currentRows = sheetProps.gridProperties!.rowCount!;
-
-      if (maxRowNeeded > currentRows) {
-        final resizeRequest = BatchUpdateSpreadsheetRequest(
-          requests: [
-            Request(
-              updateSheetProperties: UpdateSheetPropertiesRequest(
-                properties: SheetProperties(
-                  sheetId: sheetProps.sheetId,
-                  gridProperties: GridProperties(rowCount: maxRowNeeded),
-                ),
-                fields: 'gridProperties.rowCount',
-              ),
-            ),
-          ],
-        );
-        await _sheetsClient!.spreadsheets.batchUpdate(resizeRequest, _sheetId!);
-      }
-
-      try {
-        await _sheetsClient?.spreadsheets.values.batchUpdate(
-          BatchUpdateValuesRequest(
-            data: logUpdates,
-            valueInputOption: "USER_ENTERED",
-          ),
-          _sheetId ?? "",
-        );
-        for (var entry in toRemove) {
-          _logQueue.remove(entry);
-        }
-      } on SocketException catch (e) {
-        logger.w("Google is down!!! $e");
-        googleConnected.value = false;
-        return;
-      } on TimeoutException catch (e) {
-        logger.w("Google is down with timeout!!! $e");
-        googleConnected.value = false;
-        return;
-      } on DetailedApiRequestError catch (e) {
-        logger.w("Google is down with error!!! $e");
-        googleConnected.value = false;
-        return;
-      }
     }
   }
 

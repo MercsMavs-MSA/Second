@@ -121,6 +121,7 @@ class _MyAppState extends State<MyApp> {
                     );
 
                     final darkTheme = ThemeData(
+                      fontFamily: "GoogleSansFlex",
                       colorScheme: darkColorScheme,
                       useMaterial3: true,
                       scaffoldBackgroundColor: darkColorScheme.surface,
@@ -143,6 +144,7 @@ class _MyAppState extends State<MyApp> {
                     );
 
                     final lightTheme = ThemeData(
+                      fontFamily: "GoogleSansFlex",
                       colorScheme: lightColorScheme,
                       useMaterial3: true,
                       scaffoldBackgroundColor: lightColorScheme.surface,
@@ -727,7 +729,7 @@ class _HomePageState extends State<HomePage>
                               Text(
                                 timeString,
                                 style: theme.textTheme.titleLarge?.copyWith(
-                                  fontFamily: 'monospace',
+                                  fontFamily: 'GoogleSansCode',
                                 ),
                               ),
                             ],
@@ -900,7 +902,7 @@ class _HomePageState extends State<HomePage>
                         Text(
                           timeString,
                           style: theme.textTheme.titleLarge?.copyWith(
-                            fontFamily: 'monospace',
+                            fontFamily: 'GoogleSansCode',
                           ),
                         ),
                       ],
