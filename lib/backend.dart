@@ -602,7 +602,7 @@ class AttendanceTrackerBackend {
       final blockIndex = updatedHeader.length ~/ 4;
       final startCol = blockIndex * 4 + 1;
       final colLetter = columnToReference(startCol);
-      final formula = "=COUNTA(${colLetter}4:${colLetter})";
+      final formula = "=COUNTA(${colLetter}4:$colLetter)";
 
       final rawId = existingHeader[i];
       final rawName = (i + 1 < existingHeader.length) ? existingHeader[i + 1] : null;
@@ -639,7 +639,7 @@ class AttendanceTrackerBackend {
         final blockIndex = updatedHeader.length ~/ 4;
         final startCol = blockIndex * 4 + 1;
         final colLetter = columnToReference(startCol);
-        final formula = "=COUNTA(${colLetter}4:${colLetter})";
+        final formula = "=COUNTA(${colLetter}4:$colLetter)";
 
         updatedHeader.addAll([member.id, member.name, formula, ""]);
         updatedVisualHeader.addAll(["Timestamp", "Event", "Location", "Badge ID"]);
