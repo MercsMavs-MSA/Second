@@ -311,19 +311,19 @@ class _SettingsPageState extends State<SettingsPage> {
                 final result = await FilePicker.pickFiles(
                   type: FileType.custom,
                   allowedExtensions: ['json'],
-                  withData: true, // needed for web
+                  // withData: true, // needed for web
                 );
                 if (result == null) return;
 
                 String contents;
                 if (kIsWeb) {
                   // On web, use in-memory bytes
-                  final bytes = result.files.single.bytes;
+                  final bytes = await result.first.readAsBytes();
                   if (bytes == null) return;
                   contents = utf8.decode(bytes);
                 } else {
                   // On desktop/mobile, read from file path
-                  final path = result.files.single.path;
+                  final path = result.first.path;
                   if (path == null) return;
                   final file = File(path);
                   contents = await file.readAsString();
@@ -532,19 +532,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     final result = await FilePicker.pickFiles(
                       type: FileType.custom,
                       allowedExtensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
-                      withData: true, // required for web
+                      // withData: true, // required for web
                     );
                     if (result == null) return;
 
                     String base64Image;
                     if (kIsWeb) {
                       // Web → use in-memory bytes
-                      final bytes = result.files.single.bytes;
+                      final bytes = await result.first.readAsBytes();
                       if (bytes == null) return;
                       base64Image = base64Encode(bytes);
                     } else {
                       // Desktop/Mobile → use file path
-                      final path = result.files.single.path;
+                      final path = result.first.path;
                       if (path == null) return;
                       final file = File(path);
                       final bytes = await file.readAsBytes();
@@ -842,9 +842,10 @@ class _SettingsPageState extends State<SettingsPage> {
         final path = await FilePicker.saveFile(
           dialogTitle: 'Save Settings',
           fileName: 'settings.json',
+          bytes: Uint8List.fromList(json.codeUnits),
         );
         if (path == null) return; // user cancelled
-        final file = File(path);
+        final file = File(path.toFilePath());
         await file.writeAsString(json);
       }
 
@@ -867,19 +868,17 @@ class _SettingsPageState extends State<SettingsPage> {
         dialogTitle: "Choose Settings File",
         type: FileType.custom,
         allowedExtensions: ['json'],
-        withData: true, // important for web
+        // withData: true, // important for web
       );
-      if (result == null) return;
 
       String json;
       if (kIsWeb) {
         // Web → use in-memory bytes
-        final bytes = result.files.single.bytes;
-        if (bytes == null) return;
+        final bytes = await result.first.readAsBytes();
         json = utf8.decode(bytes);
       } else {
         // Desktop/Mobile → use file path
-        final path = result.files.single.path;
+        final path = result.first.path;
         if (path == null) return;
         final file = File(path);
         json = await file.readAsString();
