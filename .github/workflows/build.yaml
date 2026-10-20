@@ -150,8 +150,8 @@ jobs:
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1
           cd flutter
-          git fetch --depth 1 origin tag 3.35.1
-          git checkout 3.35.1
+          git fetch --depth 1 origin tag 3.44.8
+          git checkout 3.44.8
           cd ..
           ./flutter/bin/flutter config --no-analytics
           ./flutter/bin/flutter precache
