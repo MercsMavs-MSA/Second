@@ -313,13 +313,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   allowedExtensions: ['json'],
                   // withData: true, // needed for web
                 );
-                if (result == null) return;
 
                 String contents;
                 if (kIsWeb) {
                   // On web, use in-memory bytes
                   final bytes = await result.first.readAsBytes();
-                  if (bytes == null) return;
                   contents = utf8.decode(bytes);
                 } else {
                   // On desktop/mobile, read from file path
@@ -534,13 +532,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       allowedExtensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
                       // withData: true, // required for web
                     );
-                    if (result == null) return;
 
                     String base64Image;
                     if (kIsWeb) {
                       // Web → use in-memory bytes
                       final bytes = await result.first.readAsBytes();
-                      if (bytes == null) return;
                       base64Image = base64Encode(bytes);
                     } else {
                       // Desktop/Mobile → use file path
