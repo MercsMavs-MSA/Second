@@ -30,7 +30,7 @@ SKIP_CHECKS: bool = os.environ.get("SKIP_CHECKS", False)
 
 DEPS: list[str] = ["rich~=14.1.0", "prompt-toolkit~=3.0.52", "requests~=2.32.5"]
 
-GH_REPO: str = "Mercs-MSA/Second"
+GH_REPO: str = "MercsMavs-MSA/Second"
 APP_PROCESS_NAME: str = "/home/pi/attendance-tracker/second"
 
 CHECKS: dict[str, Callable[[], bool]] = {

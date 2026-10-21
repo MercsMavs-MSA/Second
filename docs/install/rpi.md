@@ -116,7 +116,7 @@ sudo apt install python3-venv
 Download the installation script:
 
 ```shell
-curl -SLo install.py https://raw.githubusercontent.com/Mercs-MSA/Second/refs/heads/main/pi_os_installer/main.py
+curl -SLo install.py https://raw.githubusercontent.com/MercsMavs-MSA/Second/refs/heads/main/pi_os_installer/main.py
 ```
 
 Run the installation script with superuser privileges:

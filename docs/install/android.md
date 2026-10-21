@@ -1,13 +1,13 @@
 # Android Installation
 
-Android (7+) APK files are available on [Github Releases](https://github.com/Mercs-MSA/Second/releases/latest).
+Android (7+) APK files are available on [Github Releases](https://github.com/MercsMavs-MSA/Second/releases/latest).
 
 !!! Warning
     The app only supports tablet sized devices (7" or larger). Phones are not supported.
 
 ## Installation Steps
 
-#### 1: Download and open the latest APK from [Github Releases](https://github.com/Mercs-MSA/Second/releases/latest)
+#### 1: Download and open the latest APK from [Github Releases](https://github.com/MercsMavs-MSA/Second/releases/latest)
 
 ![download.png](../media/android_install/download.png)
 
