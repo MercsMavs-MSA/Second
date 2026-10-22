@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 0.2-dev
     paths:
       - 'docs/**'
       - '.github/workflows/build-docs.yaml'
