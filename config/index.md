@@ -14,7 +14,7 @@ The default PIN code for accessing configuration options is `000000`
 
 These configuration options are only available on certain platforms:
 
-- [Android Lockdown](/config/androidlock/) (Android-only)
+- [Android Lockdown](/Second/config/androidlock/) (Android-only)
 
 ## Configuration Options
 
