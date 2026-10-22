@@ -14,6 +14,12 @@ permissions:
 env:
   FLUTTER_VERSION: '3.x'
 
+# Serialize with the docs deploy (build-docs.yaml) so both workflows never
+# push to gh-pages at the same time.
+concurrency:
+  group: gh-pages-publish
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,7 +40,7 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/Second/app/"
 
-      # Pull existing gh-pages so we can preserve /docs
+      # Pull existing gh-pages so we can preserve the deployed docs
       - name: Pull existing gh-pages
         run: |
           git fetch origin gh-pages
@@ -49,7 +55,7 @@ jobs:
           mkdir -p deploy/app
           cp -r build/web/* deploy/app/
 
-      # Keep all other folders (especially /docs) untouched
+      # Keep all other files (especially the docs) untouched
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

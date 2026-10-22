@@ -47,5 +47,11 @@ app.*.map.json
 # docs
 site/
 
+# Hugo build output & lock files
+docs/public/
+docs/resources/
+docs/.hugo_build.lock
+.hugo_build.lock
+
 # FVM Version Cache
 .fvm/

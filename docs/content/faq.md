@@ -1,4 +1,7 @@
-# FAQ
+---
+title: "FAQ"
+weight: 70
+---
 
 ## What's the difference between the global admin PIN and an admin member's PIN?
 
@@ -14,7 +17,7 @@ Admin members are configured by default to require a PIN for manual (non-RFID) c
 
 Delete the member's "Password Hash" from the Members workbook within the Google Sheet. The member will be prompted to set a new PIN the next time they try to clock in/out.
 
-![reset_admin_pin.png](media/faq/reset_admin_pin.png)
+![reset_admin_pin.png](/media/faq/reset_admin_pin.png)
 
 ## What timestamp format is used in the Google Sheets?
 
@@ -24,13 +27,13 @@ Timestamps are recorded in the `<YYYY>-<MM>-<DD>T<HH>:<MM>:<SS>.<microseconds>Z`
 
 `2025-09-01T20:23:05.681730Z`
 
-| Component   | Example     | Description                                      |
-|-------------|-------------|--------------------------------------------------|
-| Date        | 2025-09-01  | Date in `YYYY-MM-DD` format                      |
-| Separator   | T           | Separator between date and time                  |
-| Time        | 20:23:05    | Time in `HH:MM:SS` format                        |
-| Fractional  | .681730     | Fractional seconds (microsecond precision)       |
-| Timezone    | Z           | “Zulu” time indicating UTC (`+00:00`)            |
+| Component  | Example    | Description                                |
+|------------|------------|--------------------------------------------|
+| Date       | 2025-09-01 | Date in `YYYY-MM-DD` format                |
+| Separator  | T          | Separator between date and time            |
+| Time       | 20:23:05   | Time in `HH:MM:SS` format                  |
+| Fractional | .681730    | Fractional seconds (microsecond precision) |
+| Timezone   | Z          | "Zulu" time indicating UTC (`+00:00`)      |
 
 ## Can a physical keyboard be used with the app?
 

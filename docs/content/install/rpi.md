@@ -1,13 +1,17 @@
-# Raspberry Pi Installation
+---
+title: "Raspberry Pi Installation"
+weight: 20
+---
 
 _Second_ supports a Raspberry Pi 5 running Pi OS Bookworm or newer.
 It may be possible to use it on a Pi 4 or older, but this is untested.
 
 An automated installation script is provided to simplify the setup process of a kiosk system.
 
-!!! Warning
-    The kiosk installation requires Pi OS Lite.
-    Running the installation script on a full Pi OS installation will **NOT WORK**.
+{{< callout type="warning" >}}
+The kiosk installation requires Pi OS Lite.
+Running the installation script on a full Pi OS installation will **NOT WORK**.
+{{< /callout >}}
 
 ## Kiosk Installation
 
@@ -26,58 +30,59 @@ An automated installation script is provided to simplify the setup process of a 
 
 1. Select the target board
 
-    ![imager_select_device.png](../media/imager/imager_select_device.png)
+    ![imager_select_device.png](/media/imager/imager_select_device.png)
 
 2. Select Pi OS Lite (64-bit)
 
     Raspberry Pi OS (other) → Raspberry Pi OS Lite (64-bit)
-    
-    ![imager_select_os.png](../media/imager/imager_select_os.png)
+
+    ![imager_select_os.png](/media/imager/imager_select_os.png)
 
 3. Select the microSD card
-    
+
     Insert the microSD card into your computer and select it in Pi Imager.
-    
-    !!! Warning
-        This will erase all data on the selected drive.
-    
-    ![imager_select_target.png](../media/imager/imager_select_target.png)
+
+    {{< callout type="warning" >}}
+    This will erase all data on the selected drive.
+    {{< /callout >}}
+
+    ![imager_select_target.png](/media/imager/imager_select_target.png)
 
 4. Customization
 
     Here you will enable SSH and set up Wi-Fi (if not using Ethernet or your kiosk).
 
-    * Hostname
-   
+    - Hostname
+
         Configure a unique hostname for your Raspberry Pi.
-   
-    * Localization
-   
+
+    - Localization
+
         Set your locale, timezone, and keyboard layout.
-   
-    * User
-   
+
+    - User
+
         Set a username and password for the kiosk's user (the kiosk will auto-login).
-   
-    * Wi-Fi
-   
+
+    - Wi-Fi
+
         Configure your Wi-Fi SSID and password. Leave the fields blank if using Ethernet.
-   
-    * Remote access
-   
+
+    - Remote access
+
         Enable SSH to allow remote access to the Raspberry Pi for running the installation script.
-   
-    * Raspberry Pi Connect
-   
+
+    - Raspberry Pi Connect
+
         Skip this step. Raspberry Pi Connect will not work with the kiosk setup.
 
 5. Write the image
 
     Before writing, double-check all settings.
 
-    ![imager_write.png](../media/imager/imager_write.png)
+    ![imager_write.png](/media/imager/imager_write.png)
 
-    Press _Write_ and for the image to be flashed and verified. 
+    Press _Write_ and for the image to be flashed and verified.
 
 ### Booting the Pi
 
@@ -121,8 +126,9 @@ curl -SLo install.py https://raw.githubusercontent.com/MercsMavs-MSA/Second/refs
 
 Run the installation script with superuser privileges:
 
-!!! Note
-    The installation process may take a while (~10-20 minutes).
+{{< callout type="info" >}}
+The installation process may take a while (~10-20 minutes).
+{{< /callout >}}
 
 ```shell
 sudo python3 install.py
@@ -138,4 +144,4 @@ sudo reboot
 
 Congratulations! Your Raspberry Pi should now boot directly into the _Second_ kiosk application.
 
-Configure the device by following the guide [here](../config/index.md).
+Configure the device by following the guide [here](/config/).

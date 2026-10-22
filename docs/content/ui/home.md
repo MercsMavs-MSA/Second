@@ -1,12 +1,15 @@
-# Home Screen
+---
+title: "Home Screen"
+weight: 10
+---
 
-![home.png](../media/app/home.png)
+![home.png](/media/app/home.png)
 
 ## UI Elements
 
 ### 1. Members List
 
-The members list contains a list of all currently registered members from the [Members Sheet](../google_setup/sheet.md#members-sheet)
+The members list contains a list of all currently registered members from the [Members Sheet](/google_setup/sheet/#members-sheet)
 
 ### 2. Virtual Keyboard
 
@@ -36,10 +39,10 @@ It will say "System Online" if the app is connected to the sheet.
 
 "Connection Lost" will be displayed if any of the following are true:
 
-* No Internet Connection
-* Backend is being Rate-Limited
-* Sheet ID is incorrect
-* Service Account is not authorized or not set up
+- No Internet Connection
+- Backend is being Rate-Limited
+- Sheet ID is incorrect
+- Service Account is not authorized or not set up
 
 ### 8. Menu
 

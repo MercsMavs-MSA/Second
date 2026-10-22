@@ -1,3 +1,0 @@
-# RFID Scanner Hardware
-
-WIP

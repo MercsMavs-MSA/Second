@@ -1,0 +1,16 @@
+{
+  "name": "SECOND Documentation",
+  "short_name": "SECOND",
+  "description": "Documentation for the SECOND attendance tracking app.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ef5552",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
