@@ -5,6 +5,7 @@ import 'package:second/message_board_loader.dart';
 import 'package:second/passwords.dart';
 import 'package:second/settings.dart';
 import 'package:second/settings_page.dart';
+import 'package:second/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -426,36 +427,30 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                       if (entry.timeout != null &&
                           !entry.requireAccept &&
                           !_isMessageTimeoutCanceled)
-                        TweenAnimationBuilder<double>(
+                        TimedProgressBar(
                           key: ValueKey("timer_$_page"),
-                          tween: Tween(begin: 0, end: 1),
                           duration: Duration(seconds: entry.timeout!),
-                          builder: (context, value, child) {
-                            if (value == 1) {
-                              Future.microtask(() {
-                                if (!context.mounted) return;
-                                setState(() {
-                                  _isMessageTimeoutCanceled = false;
-                                  if (_page <
-                                      myMessages(
+                          onComplete: () {
+                            if (!mounted) return;
+                            setState(() {
+                              _isMessageTimeoutCanceled = false;
+                              if (_page <
+                                  myMessages(
                                         widget.user.getGroups(),
-                                            widget.user.id.toString(),
-                                            widget
-                                                    .backend
-                                                    .messageTable
-                                                    ?.entries
-                                                    .value ??
-                                                [],
-                                          ).length -
-                                          1) {
-                                    _page += 1;
-                                  } else {
-                                    _readMessages = true;
-                                  }
-                                });
-                              });
-                            }
-                            return LinearProgressIndicator(value: value);
+                                        widget.user.id.toString(),
+                                        widget
+                                                .backend
+                                                .messageTable
+                                                ?.entries
+                                                .value ??
+                                            [],
+                                      ).length -
+                                      1) {
+                                _page += 1;
+                              } else {
+                                _readMessages = true;
+                              }
+                            });
                           },
                         ),
                       if (entry.timeout != null &&
@@ -719,34 +714,23 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
                     valueListenable: isTimerRunning,
                     builder: (context, value, child) {
                       if (value) {
-                        return TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0, end: 1),
+                        return TimedProgressBar(
                           duration: const Duration(seconds: 5),
-                          builder: (context, value, child) {
-                            if (value == 1 && isTimerRunning.value) {
-                              Future.microtask(() {
-                                isTimerRunning.value = false;
-                                if (!context.mounted) return false;
-                                if (widget.user.status ==
-                                    AttendanceStatus.present) {
-                                  widget.backend.clockOut(widget.user.id);
-                                  Navigator.of(context).pop();
-                                } else {
-                                  widget.backend.clockIn(
-                                    widget.user.id,
-                                    widget.fixed
-                                        ? widget.fixedLocation!
-                                        : _selectedLocation!,
-                                  );
-                                  Navigator.of(context).pop();
-                                }
-                                return true;
-                              });
+                          onComplete: () {
+                            if (!isTimerRunning.value || !mounted) return;
+                            isTimerRunning.value = false;
+                            if (widget.user.status ==
+                                AttendanceStatus.present) {
+                              widget.backend.clockOut(widget.user.id);
+                            } else {
+                              widget.backend.clockIn(
+                                widget.user.id,
+                                widget.fixed
+                                    ? widget.fixedLocation!
+                                    : _selectedLocation!,
+                              );
                             }
-                            return LinearProgressIndicator(
-                              value: value,
-                              year2023: false,
-                            );
+                            Navigator.of(context).pop();
                           },
                         );
                       } else {

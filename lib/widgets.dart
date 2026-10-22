@@ -222,6 +222,69 @@ class _DoubleSpinBoxState extends State<DoubleSpinBox> {
   }
 }
 
+class TimedProgressBar extends StatefulWidget {
+  final Duration duration;
+  final VoidCallback onComplete;
+
+  const TimedProgressBar({
+    super.key,
+    required this.duration,
+    required this.onComplete,
+  });
+
+  @override
+  State<TimedProgressBar> createState() => _TimedProgressBarState();
+}
+
+class _TimedProgressBarState extends State<TimedProgressBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+      animationBehavior: AnimationBehavior.preserve,
+    )..addStatusListener(_handleStatus);
+    _controller.forward();
+  }
+
+  void _handleStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      widget.onComplete();
+    }
+  }
+
+  @override
+  void didUpdateWidget(TimedProgressBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.duration != widget.duration) {
+      _controller
+        ..duration = widget.duration
+        ..forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => LinearProgressIndicator(
+        value: _controller.value,
+        year2023: false,
+      ),
+    );
+  }
+}
+
 class AsyncCompleterButton extends StatefulWidget {
   final Future<void> Function() onPressed;
   final Widget child;
