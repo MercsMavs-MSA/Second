@@ -1,0 +1,30 @@
+# SECOND Documentation
+
+> SECOND is an attendance tracking app for students, mentors, coaches and volunteers. This is the official documentation for setup, installation, configuration and usage.
+
+
+## Installation
+- [Android Installation](https://mercsmavs-msa.github.io/Second/install/android/): Android (7+) APK files are available on GitHub Releases .
+The app only supports tablet sized devices …
+- [Raspberry Pi Installation](https://mercsmavs-msa.github.io/Second/install/rpi/): Second supports a Raspberry Pi 5 running Pi OS Bookworm or newer. It may be possible to use it on a …
+
+## Google Setup
+- [Google Service Accounts](https://mercsmavs-msa.github.io/Second/google_setup/account/): Second uses a Google Sheet for member lists, status tracking, and log keeping. Second requires a …
+- [Template Sheet](https://mercsmavs-msa.github.io/Second/google_setup/sheet/): A template Google Sheet for Second is provided here . Make a copy of it.
+Make the service …
+
+## Configuration
+- [Android Lockdown](https://mercsmavs-msa.github.io/Second/config/androidlock/): It is easy to bypass the Android Lockdown mode to gain unauthorized access to the device. Consider …
+
+## App UI
+- [Home Screen](https://mercsmavs-msa.github.io/Second/ui/home/): UI Elements 1. Members List The members list contains a list of all currently registered members …
+- [Member Page](https://mercsmavs-msa.github.io/Second/ui/member/): The member page can be accessed by selecting your name from the list, or by scanning in your RFID …
+
+## Root Pages
+- [RFID Scanner Hardware](https://mercsmavs-msa.github.io/Second/rfid/): WIP
+- [Limitations](https://mercsmavs-msa.github.io/Second/limitations/): Google Sheet Sizes Workbooks 10 million cells 18,278 columns 200 sheets Update 40,000 rows at once …
+- [FAQ](https://mercsmavs-msa.github.io/Second/faq/): What&rsquo;s the difference between the global admin PIN and an admin member&rsquo;s PIN? The global …
+
+---
+Generated on 2026-10-22 17:31:25 UTC
+Site: https://mercsmavs-msa.github.io/Second/
