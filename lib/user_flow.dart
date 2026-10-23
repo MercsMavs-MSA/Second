@@ -47,6 +47,7 @@ class UserFlow extends StatefulWidget {
   final String? fixedLocation;
   final List<String>? allowedLocations;
   final bool fixed;
+  final VoidCallback openSettings;
 
   const UserFlow(
     this.user,
@@ -57,6 +58,7 @@ class UserFlow extends StatefulWidget {
     this.fixedLocation,
     this.allowedLocations,
     this.fixed = false,
+    required this.openSettings,
   });
 
   @override
@@ -372,6 +374,11 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
             },
             icon: Icon(Icons.info),
           ),
+          if (widget.user.getGroups()?.contains("tablet-setup") ?? false)
+            IconButton(
+              onPressed: () {widget.openSettings();},
+              icon: Icon(Icons.admin_panel_settings_rounded),
+            )
         ],
       ),
       body: !widget.fromRfid && !_isPinVerified && widget.requirePinEntry

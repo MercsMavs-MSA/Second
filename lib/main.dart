@@ -346,7 +346,7 @@ class _HomePageState extends State<HomePage>
     ServicesBinding.instance.keyboard.addHandler((event) {
       if (event is KeyDownEvent && (widget.settingsManager.getValue<String>("rfid.reader") ??
           widget.settingsManager.getDefault<String>("rfid.reader")!) ==
-          "disable") {
+          "disable" && rfidScanInActive) {
         if (event.logicalKey == LogicalKeyboardKey.enter) {
           return false;
         } if (event.logicalKey == LogicalKeyboardKey.backspace) {
@@ -675,6 +675,34 @@ class _HomePageState extends State<HomePage>
               "Shop",
           fromRfid: fromRfid,
           requirePinEntry: user.groups.contains("require-pin"),
+          openSettings: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SettingsPage(
+                  widget.themeController,
+                  widget.logger,
+                  _backend,
+                  skipPin: true,
+                ),
+              ),
+            ).then((_) {
+              // navigate back
+              setState(() {
+                _homeScreenImage.value = base64.decode(
+                  widget.settingsManager.getValue<String>(
+                    "app.theme.logo",
+                  ) ??
+                      widget.settingsManager.getDefault<String>(
+                        "app.theme.logo",
+                      )!,
+                );
+              });
+
+              // backend
+              _backendStartup();
+            });
+          },
         ),
       ),
     ).then((_) {

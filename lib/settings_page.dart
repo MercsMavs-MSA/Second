@@ -107,11 +107,13 @@ class SettingsPage extends StatefulWidget {
     this.logger,
     this.backend, {
     super.key,
+    this.skipPin = false,
   });
 
   final ThemeController themeController;
   final Logger logger;
   final AttendanceTrackerBackend backend;
+  final bool skipPin;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -131,6 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _loadSettings();
+    _isPinVerified = widget.skipPin;
   }
 
   Future<void> _loadSettings() async {
