@@ -42,7 +42,6 @@ List<MessageBoardEntry> myMessages(
 class UserFlow extends StatefulWidget {
   final Member user;
   final AttendanceTrackerBackend backend;
-  final bool fromRfid;
   final bool requirePinEntry;
   final String? fixedLocation;
   final List<String>? allowedLocations;
@@ -53,7 +52,6 @@ class UserFlow extends StatefulWidget {
     this.user,
     this.backend, {
     super.key,
-    this.fromRfid = false,
     this.requirePinEntry = true,
     this.fixedLocation,
     this.allowedLocations,
@@ -378,10 +376,11 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
             IconButton(
               onPressed: () {widget.openSettings();},
               icon: Icon(Icons.admin_panel_settings_rounded),
-            )
+            ),
+          SizedBox(width: 8),
         ],
       ),
-      body: !widget.fromRfid && !_isPinVerified && widget.requirePinEntry
+      body: !_isPinVerified && widget.requirePinEntry
           ? _buildPinEntry(context)
           : !_readMessages &&
                 myMessages(

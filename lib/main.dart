@@ -657,6 +657,11 @@ class _HomePageState extends State<HomePage>
 
   void beginUserFlow(BuildContext context, Member user, bool fromRfid) {
     rfidScanInActive = false;
+
+    final groups = user.getGroups();
+    final requiresPin = groups?.contains("require-pin") ?? false;
+    final requiresPinBadge = groups?.contains("require-pin-badge") ?? false;
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -673,8 +678,9 @@ class _HomePageState extends State<HomePage>
           fixedLocation:
               widget.settingsManager.getValue<String>('station.location') ??
               "Shop",
-          fromRfid: fromRfid,
-          requirePinEntry: user.groups.contains("require-pin"),
+          requirePinEntry: requiresPinBadge
+            ? (fromRfid || requiresPin)
+              : (!fromRfid && requiresPin),
           openSettings: () {
             Navigator.push(
               context,
