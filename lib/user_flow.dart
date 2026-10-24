@@ -395,14 +395,14 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
             icon: Icon(Icons.info),
           ),
           SizedBox(width: 8),
-          if (isManager())
+          if (isManager() && (widget.requirePinEntry ? _isPinVerified : true))
             IconButton(
               onPressed: () {openManagement();},
               icon: Icon(Icons.manage_history, color: Theme.of(context).colorScheme.secondary),
             ),
-          if (isManager())
+          if (isManager() && (widget.requirePinEntry ? _isPinVerified : true))
             SizedBox(width: 8),
-          if (widget.user.getGroups()?.contains("tablet-setup") ?? false)
+          if ((widget.user.getGroups()?.contains("tablet-setup") ?? false) && (widget.requirePinEntry ? _isPinVerified : true))
             IconButton(
               onPressed: () {widget.openSettings();},
               icon: Icon(Icons.admin_panel_settings_rounded, color: Theme.of(context).colorScheme.tertiary),
