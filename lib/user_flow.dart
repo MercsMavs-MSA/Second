@@ -9,6 +9,8 @@ import 'package:second/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
+import 'management.dart';
+
 bool filterTarget(Iterable<String>? groups, String id, List<String> targets) {
   if ((groups??[]).contains("skip-messageboard")) {return false;}
 
@@ -109,6 +111,26 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
 
   Future<bool> _verifyPin(String enteredPin) async {
     return widget.user.passwordHash == hashPin(enteredPin);
+  }
+
+  bool isManager() {
+    return widget.user.getGroups()?.contains("manager") ?? false;
+  }
+
+  List<Member> getManagedMembers() {
+    return widget.backend.attendance.value;
+  }
+
+  void openManagement() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return ManagementPage(
+        widget.backend,
+        getManagedMembers(),
+        allowedLocations: widget.fixed
+            ? (widget.fixedLocation != null ? [widget.fixedLocation!] : ["Shop"])
+            : (widget.allowedLocations ?? ["Shop"]),
+      );
+    }));
   }
 
   Widget _buildPinSetter(BuildContext context) {
@@ -372,12 +394,20 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
             },
             icon: Icon(Icons.info),
           ),
+          SizedBox(width: 8),
+          if (isManager())
+            IconButton(
+              onPressed: () {openManagement();},
+              icon: Icon(Icons.manage_history, color: Theme.of(context).colorScheme.secondary),
+            ),
+          if (isManager())
+            SizedBox(width: 8),
           if (widget.user.getGroups()?.contains("tablet-setup") ?? false)
             IconButton(
               onPressed: () {widget.openSettings();},
-              icon: Icon(Icons.admin_panel_settings_rounded),
+              icon: Icon(Icons.admin_panel_settings_rounded, color: Theme.of(context).colorScheme.tertiary),
             ),
-          SizedBox(width: 8),
+          SizedBox(width: widget.user.getGroups()?.contains("tablet-setup") ?? false ? 8 : 16),
         ],
       ),
       body: !_isPinVerified && widget.requirePinEntry

@@ -1273,12 +1273,13 @@ class AttendanceTrackerBackend {
     _reactivateCooldown();
   }
 
-  void clockIn(int memberId, String location) {
+  void clockIn(int memberId, String location, {DateTime? time}) {
+    time ??= DateTime.now();
     if (!attendance.value.any((member) => member.id == memberId)) {
       throw Exception('Member with ID $memberId not found');
     }
 
-    final event = ClockInEvent(memberId, DateTime.now(), location);
+    final event = ClockInEvent(memberId, time, location);
     _clockInQueue.add(event);
     // if (_clockOutQueue
     //     .map((e) => e is ClockOutEvent ? e.memberId : null)
