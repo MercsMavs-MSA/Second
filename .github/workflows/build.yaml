@@ -17,6 +17,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: "3.47.8"
           channel: "stable"
 
       - name: Install Dependencies
@@ -57,7 +58,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.x"
+          flutter-version: "3.47.8"
           channel: "stable"
 
       - name: Enable Windows Support
@@ -92,7 +93,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.x"
+          flutter-version: "3.47.8"
           channel: "stable"
 
       - name: Install Dependencies
@@ -150,8 +151,8 @@ jobs:
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1
           cd flutter
-          git fetch --depth 1 origin tag 3.44.8
-          git checkout 3.44.8
+          git fetch --depth 1 origin tag 3.47.8
+          git checkout 3.47.8
           cd ..
           ./flutter/bin/flutter config --no-analytics
           ./flutter/bin/flutter precache
@@ -192,7 +193,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.x"
+          flutter-version: "3.47.8"
           channel: "stable"
 
       - name: Enable macOS Support
