@@ -74,6 +74,7 @@ class SettingsManager {
       'rfid.hid.timeout': 0.2,
       'rfid.hid.eol': 'RETURN',
       'rfid.hid.format': 'decAscii',
+      'checkout.performAutoCheckOut': false,
       'backend.interval.activePull': 20,
       'backend.interval.activePush': 10,
       'backend.interval.inactivePull': 90,

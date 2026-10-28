@@ -1055,6 +1055,42 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     ListTile(
+                      title: const Text("Perform Checkout"),
+                      subtitle: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Enable this device as the checkout master",
+                          ),
+                          Card(
+                            color: Theme.of(context).colorScheme.tertiaryContainer,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(children: [Icon(Icons.warning_rounded,
+                                color: Theme.of(context).colorScheme.onTertiaryContainer,), SizedBox(width: 8), Text("Only enable this on one device at a time to avoid collisions."),],),
+                            ),
+                          )
+                        ],
+                      ),
+                      leading: const Icon(Icons.logout),
+                      trailing: Switch(
+                        value:
+                            _settingsManager.getValue<bool>(
+                              "checkout.performAutoCheckOut",
+                            ) ??
+                            false,
+                        onChanged: (value) {
+                          setState(() {
+                            _settingsManager.setValue(
+                              "checkout.performAutoCheckOut",
+                              value,
+                            );
+                          });
+                        },
+                      ),
+                    ),
+                    ListTile(
                       title: const Text("Auto Checkout"),
                       subtitle: const Text(
                         "Options for configuring auto-checkout per day of the week",

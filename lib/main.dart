@@ -299,6 +299,14 @@ class _HomePageState extends State<HomePage>
     _checkoutScheduler = CheckoutScheduler(
       configs: _backend.timingsTable?.entries.value ?? [],
       onTrigger: (CheckoutConfigEntry entry, DateTime appliedTime) async {
+        final performCheckout =
+            widget.settingsManager.getValue<bool>("checkout.performAutoCheckOut") ??
+            widget.settingsManager.getDefault<bool>("checkout.performAutoCheckOut") ??
+            false;
+        if (!performCheckout) {
+          widget.logger.t("Auto-Checkout skipped: perform checkout disabled");
+          return;
+        }
         widget.logger.t("Running Auto-Checkout");
         await _backend.instantMemberUpdate();
         for (final member in _backend.attendance.value) {
