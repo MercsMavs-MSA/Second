@@ -384,11 +384,21 @@ class PinKeypad extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildKey(context, 'C', onPressed: onClear),
+            _buildKey(
+              context,
+              'C',
+              icon: Icons.clear,
+              onPressed: onClear,
+            ),
             const SizedBox(width: 8),
             _buildKey(context, '0'),
             const SizedBox(width: 8),
-            _buildKey(context, '⌫', onPressed: onBackspace),
+            _buildKey(
+              context,
+              '⌫',
+              icon: Icons.backspace_outlined,
+              onPressed: onBackspace,
+            ),
           ],
         ),
       ],
@@ -398,6 +408,7 @@ class PinKeypad extends StatelessWidget {
   Widget _buildKey(
     BuildContext context,
     String label, {
+    IconData? icon,
     VoidCallback? onPressed,
   }) {
     return ElevatedButton(
@@ -407,12 +418,14 @@ class PinKeypad extends StatelessWidget {
         fixedSize: const Size(64, 64),
         padding: const EdgeInsets.all(8),
       ),
-      child: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-      ),
+      child: icon != null
+          ? Icon(icon, size: 28)
+          : Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
     );
   }
 }
