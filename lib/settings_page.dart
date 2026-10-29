@@ -6,6 +6,7 @@ import 'package:second/auto_checkout.dart';
 import 'package:second/backend.dart';
 import 'package:second/settings.dart';
 import 'package:second/string_ext.dart';
+import 'package:second/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,92 +15,6 @@ import 'package:logger/logger.dart';
 
 import 'dev_opts_page.dart';
 import 'log_inst.dart';
-
-class PinKeypad extends StatelessWidget {
-  final Function(String) onKeyPressed;
-  final Function() onClear;
-  final Function() onBackspace;
-
-  const PinKeypad({
-    super.key,
-    required this.onKeyPressed,
-    required this.onClear,
-    required this.onBackspace,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildKey(context, '1'),
-            const SizedBox(width: 8),
-            _buildKey(context, '2'),
-            const SizedBox(width: 8),
-            _buildKey(context, '3'),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildKey(context, '4'),
-            const SizedBox(width: 8),
-            _buildKey(context, '5'),
-            const SizedBox(width: 8),
-            _buildKey(context, '6'),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildKey(context, '7'),
-            const SizedBox(width: 8),
-            _buildKey(context, '8'),
-            const SizedBox(width: 8),
-            _buildKey(context, '9'),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildKey(context, 'C', onPressed: onClear),
-            const SizedBox(width: 8),
-            _buildKey(context, '0'),
-            const SizedBox(width: 8),
-            _buildKey(context, '⌫', onPressed: onBackspace),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKey(
-    BuildContext context,
-    String label, {
-    VoidCallback? onPressed,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed ?? () => onKeyPressed(label),
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        fixedSize: const Size(64, 64),
-        padding: const EdgeInsets.all(8),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage(
@@ -1068,7 +983,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(children: [Icon(Icons.warning_rounded,
-                                color: Theme.of(context).colorScheme.onTertiaryContainer,), SizedBox(width: 8), Text("Only enable this on one device at a time to avoid collisions."),],),
+                                color: Theme.of(context).colorScheme.onTertiaryContainer,), SizedBox(width: 8), Expanded(child: Text("Only enable this on one device at a time to avoid collisions.")),],),
                             ),
                           )
                         ],
@@ -1170,6 +1085,81 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
 
                         icon: const Icon(Icons.arrow_forward),
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text("Repair Members List / Clear Cache"),
+                      subtitle: const Text(
+                        "Clear cached member data",
+                      ),
+                      leading: const Icon(Icons.refresh),
+                      trailing: IconButton(
+                        onPressed: () async {
+                          await _settingsManager.prefs?.remove('cached.members');
+                          widget.backend.instantMemberUpdate();
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Member cache cleared'),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.cleaning_services),
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text("Reset All Settings"),
+                      subtitle: const Text(
+                        "Restore all settings to their default values",
+                      ),
+                      leading: const Icon(Icons.restore),
+                      trailing: IconButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              icon: Icon(
+                                Icons.warning_rounded,
+                                size: 64,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              title: const Text('Reset All Settings'),
+                              content: const Text(
+                                'This will reset all settings to defaults. This action cannot be undone.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    await _settingsManager.resetToDefaults();
+                                    await _settingsManager.prefs?.remove('cached.members');
+                                    widget.backend.instantMemberUpdate();
+                                    await _loadSettings();
+                                    if (!context.mounted) return;
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'All settings reset to defaults',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    "Reset",
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.delete_forever),
                       ),
                     ),
                   ],

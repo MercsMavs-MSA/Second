@@ -330,3 +330,89 @@ class _AsyncCompleterButtonState extends State<AsyncCompleterButton> {
     );
   }
 }
+
+class PinKeypad extends StatelessWidget {
+  final Function(String) onKeyPressed;
+  final Function() onClear;
+  final Function() onBackspace;
+
+  const PinKeypad({
+    super.key,
+    required this.onKeyPressed,
+    required this.onClear,
+    required this.onBackspace,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildKey(context, '1'),
+            const SizedBox(width: 8),
+            _buildKey(context, '2'),
+            const SizedBox(width: 8),
+            _buildKey(context, '3'),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildKey(context, '4'),
+            const SizedBox(width: 8),
+            _buildKey(context, '5'),
+            const SizedBox(width: 8),
+            _buildKey(context, '6'),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildKey(context, '7'),
+            const SizedBox(width: 8),
+            _buildKey(context, '8'),
+            const SizedBox(width: 8),
+            _buildKey(context, '9'),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildKey(context, 'C', onPressed: onClear),
+            const SizedBox(width: 8),
+            _buildKey(context, '0'),
+            const SizedBox(width: 8),
+            _buildKey(context, '⌫', onPressed: onBackspace),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKey(
+    BuildContext context,
+    String label, {
+    VoidCallback? onPressed,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed ?? () => onKeyPressed(label),
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        fixedSize: const Size(64, 64),
+        padding: const EdgeInsets.all(8),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}

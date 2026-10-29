@@ -29,6 +29,7 @@ import 'package:second/user_flow.dart';
 import 'package:second/util.dart';
 import 'package:second/widgets.dart';
 import 'package:second/optimization.dart';
+import 'package:second/introduction.dart';
 
 import 'log_printer.dart';
 
@@ -166,17 +167,28 @@ class _MyAppState extends State<MyApp> {
                           : null,
                     );
 
+                    final isFirstRun =
+                        widget.settingsManager.getValue<bool>("app.firstRun") ??
+                        widget.settingsManager.getDefault<bool>("app.firstRun") ??
+                        true;
                     return MaterialApp(
                       title: 'Second',
                       themeMode: widget.themeController.themeMode.value,
                       darkTheme: darkTheme,
                       theme: lightTheme,
-                      home: HomePage(
-                        widget.themeController,
-                        widget.settingsManager,
-                        widget.logger,
-                        greenCenterConfetti,
-                      ),
+                      home: isFirstRun
+                          ? IntroductionScreen(
+                              settingsManager: widget.settingsManager,
+                              themeController: widget.themeController,
+                              logger: widget.logger,
+                              greenCenterConfetti: greenCenterConfetti,
+                            )
+                          : HomePage(
+                              widget.themeController,
+                              widget.settingsManager,
+                              widget.logger,
+                              greenCenterConfetti,
+                            ),
                     );
                   },
                 );

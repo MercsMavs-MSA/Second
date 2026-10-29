@@ -75,6 +75,7 @@ class SettingsManager {
       'rfid.hid.eol': 'RETURN',
       'rfid.hid.format': 'decAscii',
       'checkout.performAutoCheckOut': false,
+      'app.firstRun': true,
       'backend.interval.activePull': 20,
       'backend.interval.activePush': 10,
       'backend.interval.inactivePull': 90,
@@ -172,6 +173,20 @@ class SettingsManager {
       await importSettings(settings);
     } catch (e) {
       throw Exception('Invalid JSON format');
+    }
+  }
+
+  Future<void> resetToDefaults() async {
+    if (prefs == null) return;
+    final keys = prefs!.getKeys();
+    for (final key in keys) {
+      if (key.startsWith(_prefix)) {
+        await prefs!.remove(key);
+      }
+    }
+    // Re-initialize defaults
+    for (var entry in _defaultSettings.entries) {
+      await setValue(entry.key, entry.value);
     }
   }
 }

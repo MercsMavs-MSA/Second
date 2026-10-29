@@ -83,6 +83,7 @@ flutter:
     - assets/icons/icon_96.png
     - assets/animations/fail.json
     - assets/animations/success.json
+    - assets/animations/introduction.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
