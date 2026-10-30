@@ -82,6 +82,7 @@ class SettingsManager {
       'backend.interval.inactivePush': 60,
       'backend.interval.activeCooldown': 60,
       'backend.interval.configsReload': 360,
+      'backend.networkTimeout': 5.0,
     };
 
     _developerOptions = {
@@ -94,6 +95,7 @@ class SettingsManager {
       'backend.interval.inactivePush': int,
       'backend.interval.activeCooldown': int,
       'backend.interval.configsReload': int,
+      'backend.networkTimeout': double,
     };
   }
 

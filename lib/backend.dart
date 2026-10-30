@@ -347,6 +347,7 @@ class AttendanceTrackerBackend {
   String? _sheetId;
   ServiceAccountCredentials? _credentials;
   AutoRefreshingAuthClient? _authClient;
+  int _networkTimeout = 5;
   SheetsApi? _sheetsClient;
   Spreadsheet? _spreadsheet;
 
@@ -405,6 +406,7 @@ class AttendanceTrackerBackend {
   Future<void> initialize(
     String sheetId,
     String oauthCredentialString, {
+    int networkTimeout = 5,
     int pullIntervalActive = 5,
     int pushIntervalActive = 2,
     int pullIntervalInactive = 10,
@@ -414,6 +416,7 @@ class AttendanceTrackerBackend {
   }) async {
     _oauthCredentials = jsonDecode(oauthCredentialString);
     _sheetId = sheetId;
+    _networkTimeout = networkTimeout;
 
     _clockInQueue.clear();
     _clockOutQueue.clear();
@@ -458,7 +461,7 @@ class AttendanceTrackerBackend {
       final baseClient = http.Client();
       final timeoutClient = TimeoutClient(
         baseClient,
-        const Duration(seconds: 5),
+        Duration(seconds: _networkTimeout),
       );
 
       _credentials = ServiceAccountCredentials.fromJson(_oauthCredentials);
@@ -691,7 +694,7 @@ class AttendanceTrackerBackend {
       final baseClient = http.Client();
       final timeoutClient = TimeoutClient(
         baseClient,
-        const Duration(seconds: 5),
+        Duration(seconds: _networkTimeout),
       );
 
       _credentials = ServiceAccountCredentials.fromJson(_oauthCredentials);
