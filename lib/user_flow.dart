@@ -407,7 +407,7 @@ class _UserFlowState extends State<UserFlow> with TickerProviderStateMixin {
               onPressed: () {widget.openSettings();},
               icon: Icon(Icons.admin_panel_settings_rounded, color: Theme.of(context).colorScheme.tertiary),
             ),
-          SizedBox(width: widget.user.getGroups()?.contains("tablet-setup") ?? false ? 8 : 16),
+          SizedBox(width: (widget.user.getGroups()?.contains("tablet-setup") ?? false) ? 8 : 0),
         ],
       ),
       body: !_isPinVerified && widget.requirePinEntry
