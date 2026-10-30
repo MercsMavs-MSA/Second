@@ -7,6 +7,7 @@ import 'package:async/async.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:second/log_inst.dart';
+import 'package:second/logging_sheets_api.dart';
 import 'package:second/message_board_loader.dart';
 import 'package:second/passwords.dart';
 import 'package:second/settings.dart';
@@ -351,6 +352,9 @@ class AttendanceTrackerBackend {
   SheetsApi? _sheetsClient;
   Spreadsheet? _spreadsheet;
 
+  SheetsApi? get sheetsClient => _sheetsClient;
+  String? get sheetId => _sheetId;
+
   CheckoutConfigurationTable? timingsTable;
   MessageBoardConfigurationTable? messageTable;
 
@@ -469,7 +473,7 @@ class AttendanceTrackerBackend {
         SheetsApi.spreadsheetsScope,
       ], baseClient: timeoutClient);
 
-      _sheetsClient = SheetsApi(_authClient!);
+      _sheetsClient = LoggingSheetsApi(_authClient!, logger);
       _spreadsheet = await _sheetsClient?.spreadsheets.get(_sheetId!);
       timingsTable = CheckoutConfigurationTable(
         _sheetsClient!,
@@ -702,7 +706,7 @@ class AttendanceTrackerBackend {
         SheetsApi.spreadsheetsScope,
       ], baseClient: timeoutClient);
 
-      _sheetsClient = SheetsApi(_authClient!);
+      _sheetsClient = LoggingSheetsApi(_authClient!, logger);
       _spreadsheet = await _sheetsClient?.spreadsheets.get(_sheetId!);
 
       final existingTitles =
