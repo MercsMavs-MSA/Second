@@ -83,11 +83,26 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late ConfettiController greenCenterConfetti;
+  late bool isFirstRun;
 
   @override
   void initState() {
     super.initState();
     greenCenterConfetti = ConfettiController();
+    _updateFirstRunState();
+  }
+
+  void _updateFirstRun() {
+    setState(() {
+      _updateFirstRunState();
+    });
+  }
+
+  void _updateFirstRunState() {
+    isFirstRun =
+        widget.settingsManager.getValue<bool>("app.firstRun") ??
+            widget.settingsManager.getDefault<bool>("app.firstRun") ??
+            true;
   }
 
   @override
@@ -167,10 +182,6 @@ class _MyAppState extends State<MyApp> {
                           : null,
                     );
 
-                    final isFirstRun =
-                        widget.settingsManager.getValue<bool>("app.firstRun") ??
-                        widget.settingsManager.getDefault<bool>("app.firstRun") ??
-                        true;
                     return MaterialApp(
                       title: 'Second',
                       themeMode: widget.themeController.themeMode.value,
@@ -182,12 +193,14 @@ class _MyAppState extends State<MyApp> {
                               themeController: widget.themeController,
                               logger: widget.logger,
                               greenCenterConfetti: greenCenterConfetti,
+                              onComplete: _updateFirstRun,
                             )
                           : HomePage(
                               widget.themeController,
                               widget.settingsManager,
                               widget.logger,
                               greenCenterConfetti,
+                              resetSettings: _updateFirstRun,
                             ),
                     );
                   },
@@ -219,6 +232,7 @@ class HomePage extends StatefulWidget {
     this.logger,
     this.greenCenterConfetti, {
     super.key,
+    this.resetSettings,
   });
 
   final ThemeController themeController;
@@ -226,6 +240,7 @@ class HomePage extends StatefulWidget {
   final Logger logger;
 
   final ConfettiController greenCenterConfetti;
+  final VoidCallback? resetSettings;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -581,26 +596,24 @@ class _HomePageState extends State<HomePage>
   }
 
   void _displayErrorPopup(String error) {
-    final rootContext = context; // capture once from the widget
+    final rootContext = context;
+    if (!mounted) return;
     showDialog(
       barrierColor: Colors.red.withAlpha(40),
       barrierDismissible: true,
       context: rootContext,
       builder: (dialogContext) {
-        // Schedule dismissal using the rootContext, not dialogContext
         Timer(const Duration(seconds: 1), () {
-          if (mounted &&
-              Navigator.of(rootContext, rootNavigator: true).canPop()) {
-            Navigator.of(rootContext, rootNavigator: true).pop();
+          if (mounted) {
+            Navigator.of(dialogContext).maybePop();
           }
         });
-
         return AlertDialog(
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Lottie.asset('assets/animations/fail.json', reverse: true),
-              Text(error, style: Theme.of(rootContext).textTheme.titleLarge),
+              Text(error, style: Theme.of(dialogContext).textTheme.titleLarge),
             ],
           ),
           actionsPadding: EdgeInsets.zero,
@@ -610,6 +623,7 @@ class _HomePageState extends State<HomePage>
   }
 
   void _displaySuccessPopup() async {
+    if (!mounted) return;
     if (!widget.themeController.lowResouceMode.value) {
       widget.greenCenterConfetti.play();
     }
@@ -617,9 +631,11 @@ class _HomePageState extends State<HomePage>
       barrierColor: Colors.green.withAlpha(40),
       barrierDismissible: true,
       context: context,
-      builder: (context) {
-        Timer(Duration(seconds: 1), () {
-          Navigator.of(context).maybePop();
+      builder: (dialogContext) {
+        Timer(const Duration(seconds: 1), () {
+          if (mounted) {
+            Navigator.of(dialogContext).maybePop();
+          }
           widget.greenCenterConfetti.stop(clearAllParticles: true);
         });
         return AlertDialog(
@@ -710,6 +726,9 @@ class _HomePageState extends State<HomePage>
                   widget.logger,
                   _backend,
                   skipPin: true,
+                  resetSettings: () {
+                    widget.resetSettings?.call();
+                  },
                 ),
               ),
             ).then((_) {
@@ -808,6 +827,9 @@ class _HomePageState extends State<HomePage>
                                   widget.themeController,
                                   widget.logger,
                                   _backend,
+                                  resetSettings: () {
+                                    widget.resetSettings?.call();
+                                  },
                                 ),
                               ),
                             ).then((_) {
@@ -981,6 +1003,9 @@ class _HomePageState extends State<HomePage>
                             widget.themeController,
                             widget.logger,
                             _backend,
+                            resetSettings: () {
+                              widget.resetSettings?.call();
+                            },
                           ),
                         ),
                       ).then((_) {

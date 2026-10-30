@@ -23,12 +23,14 @@ class SettingsPage extends StatefulWidget {
     this.backend, {
     super.key,
     this.skipPin = false,
+    required this.resetSettings,
   });
 
   final ThemeController themeController;
   final Logger logger;
   final AttendanceTrackerBackend backend;
   final bool skipPin;
+  final VoidCallback resetSettings;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -1147,6 +1149,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         ),
                                       ),
                                     );
+                                    widget.resetSettings();
                                   },
                                   child: Text(
                                     "Reset",
