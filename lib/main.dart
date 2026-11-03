@@ -183,6 +183,7 @@ class _MyAppState extends State<MyApp> {
                     );
 
                     return MaterialApp(
+                      debugShowCheckedModeBanner: false,
                       title: 'Second',
                       themeMode: widget.themeController.themeMode.value,
                       darkTheme: darkTheme,

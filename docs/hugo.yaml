@@ -54,7 +54,8 @@ params:
     displayLogo: true
     width: normal
     logo:
-      path: media/logos/icon_144.png
+      path: media/logos/header.svg
+      dark: media/logos/header-dark.svg
       width: 28
       height: 28
 

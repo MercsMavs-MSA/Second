@@ -1,0 +1,477 @@
+<div class="feature-carousel-container" id="featureCarousel">
+  <div class="feature-carousel-viewport">
+    <div class="feature-carousel-track">
+      <!-- Slide 1 -->
+      <div class="feature-carousel-slide active">
+        <div class="slide-background" style="background: radial-gradient(ellipse at 50% 80%, rgba(124, 58, 237, 0.22), transparent 70%);"></div>
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-badge purple">Automated Setup</span>
+            <h3 class="slide-title">Easy setup for large and small organizations</h3>
+            <p class="slide-subtitle">Simply create a members list, and the app will handle log creation and formatting automatically.</p>
+          </div>
+          <div class="slide-image-wrapper">
+            <img src="{{ relURL `media/home/members_sheet.svg` }}" alt="Members Sheet Setup" class="slide-image">
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="feature-carousel-slide">
+        <div class="slide-background" style="background: radial-gradient(ellipse at 50% 80%, rgba(225, 29, 72, 0.22), transparent 70%);"></div>
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-badge red">Hardware Integration</span>
+            <h3 class="slide-title">Support for RFID sign-in</h3>
+            <p class="slide-subtitle">Compatible with any HID scanner that outputs numbered IDs for instant badge check-ins.</p>
+          </div>
+          <div class="slide-image-wrapper">
+            <img src="{{ relURL `media/home/rfid.svg` }}" alt="RFID Sign-In" class="slide-image">
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="feature-carousel-slide">
+        <div class="slide-background" style="background: radial-gradient(ellipse at 50% 80%, rgba(217, 119, 6, 0.22), transparent 70%);"></div>
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-badge amber">Fast Attendance</span>
+            <h3 class="slide-title">Fast Check In/Out</h3>
+            <p class="slide-subtitle">Fast and simple check in/out with instant name search and location selection.</p>
+          </div>
+          <div class="slide-image-wrapper">
+            <img src="{{ relURL `media/home/list.svg` }}" alt="Fast Check In/Out" class="slide-image">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Arrows -->
+  <button class="carousel-arrow prev" aria-label="Previous Slide">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+  </button>
+  <button class="carousel-arrow next" aria-label="Next Slide">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </button>
+
+  <!-- Dots Indicators -->
+  <div class="carousel-dots">
+    <button class="carousel-dot active" aria-label="Go to slide 1"></button>
+    <button class="carousel-dot" aria-label="Go to slide 2"></button>
+    <button class="carousel-dot" aria-label="Go to slide 3"></button>
+  </div>
+</div>
+
+<style>
+.feature-carousel-container {
+  position: relative;
+  width: 100%;
+  max-width: 1050px;
+  margin: 2rem auto;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* Dark Mode Support for Hextra theme */
+html.dark .feature-carousel-container,
+.dark .feature-carousel-container,
+body.dark .feature-carousel-container {
+  background-color: rgba(17, 24, 39, 0.75);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+.feature-carousel-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  min-height: 380px;
+}
+
+.feature-carousel-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.feature-carousel-slide {
+  position: relative;
+  min-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 4rem;
+  box-sizing: border-box;
+  opacity: 0.35;
+  transition: opacity 0.6s ease;
+}
+
+.feature-carousel-slide.active {
+  opacity: 1;
+}
+
+.slide-background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.slide-content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+  width: 100%;
+}
+
+.slide-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.slide-badge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.slide-badge.purple {
+  background: rgba(124, 58, 237, 0.12);
+  color: #6d28d9;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+}
+
+html.dark .slide-badge.purple,
+.dark .slide-badge.purple {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c4b5fd;
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+.slide-badge.red {
+  background: rgba(225, 29, 72, 0.12);
+  color: #be123c;
+  border: 1px solid rgba(225, 29, 72, 0.25);
+}
+
+html.dark .slide-badge.red,
+.dark .slide-badge.red {
+  background: rgba(251, 113, 133, 0.15);
+  color: #fecdd3;
+  border-color: rgba(251, 113, 133, 0.3);
+}
+
+.slide-badge.amber {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
+html.dark .slide-badge.amber,
+.dark .slide-badge.amber {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fde68a;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.slide-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 1rem 0;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+html.dark .slide-title,
+.dark .slide-title {
+  color: #f9fafb;
+}
+
+.slide-subtitle {
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0;
+}
+
+html.dark .slide-subtitle,
+.dark .slide-subtitle {
+  color: #9ca3af;
+}
+
+.slide-image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.slide-image {
+  max-width: 100%;
+  max-height: 260px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.08));
+  transition: transform 0.5s ease;
+}
+
+.feature-carousel-container:hover .slide-image {
+  transform: scale(1.03);
+}
+
+/* Navigation Arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(4px);
+}
+
+html.dark .carousel-arrow,
+.dark .carousel-arrow {
+  background: rgba(31, 41, 55, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f3f4f6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.carousel-arrow:hover {
+  background: #ffffff;
+  color: #111827;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+html.dark .carousel-arrow:hover,
+.dark .carousel-arrow:hover {
+  background: #374151;
+  color: #ffffff;
+}
+
+.carousel-arrow.prev {
+  left: 1.25rem;
+}
+
+.carousel-arrow.next {
+  right: 1.25rem;
+}
+
+/* Dots Indicators */
+.carousel-dots {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.carousel-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  border: none;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.dark .carousel-dot,
+.dark .carousel-dot {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.carousel-dot.active {
+  width: 2rem;
+  background: #6d28d9;
+}
+
+html.dark .carousel-dot.active,
+.dark .carousel-dot.active {
+  background: #a78bfa;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .slide-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .slide-text {
+    align-items: center;
+    text-align: center;
+  }
+
+  .feature-carousel-slide {
+    padding: 2.5rem 1.75rem 3.5rem 1.75rem;
+  }
+
+  .slide-title {
+    font-size: 1.35rem;
+  }
+
+  .slide-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .slide-image {
+    max-height: 180px;
+  }
+
+  .carousel-arrow {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .carousel-arrow.prev {
+    left: 0.5rem;
+  }
+
+  .carousel-arrow.next {
+    right: 0.5rem;
+  }
+}
+</style>
+
+<script>
+(function() {
+  function initCarousel() {
+    const container = document.getElementById("featureCarousel");
+    if (!container) return;
+
+    const track = container.querySelector(".feature-carousel-track");
+    const slides = container.querySelectorAll(".feature-carousel-slide");
+    const dots = container.querySelectorAll(".carousel-dot");
+    const prevBtn = container.querySelector(".carousel-arrow.prev");
+    const nextBtn = container.querySelector(".carousel-arrow.next");
+
+    if (!track || slides.length === 0) return;
+
+    let currentIndex = 0;
+    const slideCount = slides.length;
+    let autoPlayTimer = null;
+    const intervalTime = 5000;
+
+    function updateCarousel(index) {
+      currentIndex = (index + slideCount) % slideCount;
+
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === currentIndex);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle("active", i === currentIndex);
+      });
+    }
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      autoPlayTimer = setInterval(() => {
+        updateCarousel(currentIndex + 1);
+      }, intervalTime);
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+      }
+    }
+
+    if (prevBtn) {
+      prevBtn.onclick = function() {
+        updateCarousel(currentIndex - 1);
+        startAutoPlay();
+      };
+    }
+
+    if (nextBtn) {
+      nextBtn.onclick = function() {
+        updateCarousel(currentIndex + 1);
+        startAutoPlay();
+      };
+    }
+
+    dots.forEach((dot, index) => {
+      dot.onclick = function() {
+        updateCarousel(index);
+        startAutoPlay();
+      };
+    });
+
+    container.addEventListener("mouseenter", stopAutoPlay);
+    container.addEventListener("mouseleave", startAutoPlay);
+
+    let startX = 0;
+    let endX = 0;
+
+    container.addEventListener("touchstart", function(e) {
+      startX = e.touches[0].clientX;
+      stopAutoPlay();
+    }, { passive: true });
+
+    container.addEventListener("touchend", function(e) {
+      endX = e.changedTouches[0].clientX;
+      const diffX = startX - endX;
+      if (Math.abs(diffX) > 40) {
+        if (diffX > 0) {
+          updateCarousel(currentIndex + 1);
+        } else {
+          updateCarousel(currentIndex - 1);
+        }
+      }
+      startAutoPlay();
+    }, { passive: true });
+
+    updateCarousel(0);
+    startAutoPlay();
+  }
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(initCarousel, 50);
+  } else {
+    document.addEventListener("DOMContentLoaded", initCarousel);
+  }
+})();
+</script>

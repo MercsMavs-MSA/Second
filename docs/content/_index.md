@@ -1,10 +1,27 @@
 ---
 title: "SECOND"
+layout: hextra-home
 cascade:
   type: docs
+imageZoom: false
 ---
 
+
 ![icon_144.png](/media/logos/icon_144.png)
+
+<div class="hx:mt-6 hx:mb-6">
+{{< hextra/hero-headline >}}
+An attendance tracking system for organizations.&nbsp;<br class="hx:sm:block hx:hidden" />Powered by Google Sheets
+{{< /hextra/hero-headline >}}
+</div>
+
+<div class="hx:mb-6">
+{{< hextra/hero-button text="Get Started" link="/Second/install" >}}
+</div>
+
+<div class="hx:mt-6"></div>
+
+{{< feature-carousel >}}
 
 _SECOND_ is an app to track the attendance of students, mentors, coaches and volunteers to/from events for the purpose of being able to note hours given.
 
