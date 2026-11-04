@@ -9,11 +9,10 @@ The global admin PIN is used to access the **app's configuration settings and lo
 
 An admin member's PIN, on the other hand, is specific to individual admin members stored in the Google Sheet. **This PIN is used for clocking in and out if the admin does not use RFID.**
 
-## What's the difference between an admin member and a regular member?
+## How do I give an individual member the ability to control tablet settings without using the global admin PIN?
 
-Admin members are configured by default to require a PIN for manual (non-RFID) clock in/out, while student members do not require a PIN.
-
-## How do I reset the password of an admin member?
+<!-- TODO: add link to docs on the groups system -->
+[Assign]() them to the `tablet-setup` group.
 
 Delete the member's "Password Hash" from the Members workbook within the Google Sheet. The member will be prompted to set a new PIN the next time they try to clock in/out.
 
@@ -21,20 +20,25 @@ Delete the member's "Password Hash" from the Members workbook within the Google 
 
 ## What timestamp format is used in the Google Sheets?
 
-Timestamps are recorded in the `<YYYY>-<MM>-<DD>T<HH>:<MM>:<SS>.<microseconds>Z` format. All timestamps are recorded using UTC.
+Timestamps are recorded in the using a millisecond epoch, using the `=EPOCHTODATE` formula function.
 
 ### Example
 
-`2025-09-01T20:23:05.681730Z`
+`=EPOCHTODATE(1792943631783, 2)`
 
-| Component  | Example    | Description                                |
-|------------|------------|--------------------------------------------|
-| Date       | 2025-09-01 | Date in `YYYY-MM-DD` format                |
-| Separator  | T          | Separator between date and time            |
-| Time       | 20:23:05   | Time in `HH:MM:SS` format                  |
-| Fractional | .681730    | Fractional seconds (microsecond precision) |
-| Timezone   | Z          | "Zulu" time indicating UTC (`+00:00`)      |
+| Component | Example       | Description                              |
+|-----------|---------------|------------------------------------------|
+| Epoch     | 1792943631783 | Milliseconds since UNIX epoch            |
+| Time Unit | 2             | Indicated milliseconds. Will always be 2 |
+
+## Can I make force a member to require a PIN, even if they are signing in with RFID?
+
+<!-- TODO: add link to docs on the groups system -->
+[Assign]() them to the `require-pin-badge` and `require-pin` group.
 
 ## Can a physical keyboard be used with the app?
 
-No, a physical keyboard will not work with the app, even if RFID is disabled. The app will only work using the virtual keyboard. This also applies to desktop platforms.
+Yes, a physical keyboard can be used as a faster method to type in member names, if using RFID is not possible.
+**You can't use a physical keyboard if an HID scanner is present**
+
+<!-- TODO: add mention of how to change the scanner setting-->
