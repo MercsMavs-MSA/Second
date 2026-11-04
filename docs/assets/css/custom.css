@@ -18,3 +18,15 @@
   height: auto;
   transform: translateX(-50%);
 }
+
+.hx-font-headline, .hx-font-headline > h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+:root {
+  --primary-hue: 0deg;
+  --primary-saturation: 55%;
+  --primary-lightness: 50%;
+}

@@ -6,41 +6,27 @@ cascade:
 imageZoom: false
 ---
 
+<img alt="Logo" height="144" src="media/logos/icon_512.png" width="144"/>
 
-![icon_144.png](/media/logos/icon_144.png)
-
-<div class="hx:mt-6 hx:mb-6">
+<div class="hx:mt-6 hx-font-headline">
 {{< hextra/hero-headline >}}
-An attendance tracking system for organizations.&nbsp;<br class="hx:sm:block hx:hidden" />Powered by Google Sheets
+Frictionless Attendance Tracking for Teams. <br/>
+<span class="hx:bg-gradient-to-r hx:from-blue-500 hx:to-teal-400 hx:bg-clip-text hx:text-transparent">Powered by Google Sheets.</span>
 {{< /hextra/hero-headline >}}
 </div>
 
-<div class="hx:mb-6">
-{{< hextra/hero-button text="Get Started" link="/Second/install" >}}
+<div class="hx:mt-4 hx:mb-6">
+{{< hextra/hero-subtitle >}}
+Scan badges, capture timestamps, and sync directly to your Google Sheets backend in seconds with plug-and-play HID hardware support.
+{{< /hextra/hero-subtitle >}}
 </div>
 
-<div class="hx:mt-6"></div>
+<div class="hx:mb-6 hx:flex hx:gap-4 hx:flex-wrap">
+{{< hextra/hero-button text="Get Started" link="/Second/install" >}}
+{{< hextra/hero-button text="Web App" link="/Second/app" style="background: hsl(var(--primary-hue) calc(var(--primary-saturation) / 3) calc(calc(var(--primary-lightness) / 50) * 20));" >}}
+{{< hextra/hero-button text="GitHub Repo" link="https://github.com/MercsMavs-MSA/Second" style="background: hsl(var(--primary-hue) calc(var(--primary-saturation) / 3) calc(calc(var(--primary-lightness) / 50) * 20));" >}}
+</div>
 
+<div class="hx:mt-6 hx:mb-12">
 {{< feature-carousel >}}
-
-_SECOND_ is an app to track the attendance of students, mentors, coaches and volunteers to/from events for the purpose of being able to note hours given.
-
-Members and activity logs are stored and managed on a Google Sheet, eliminating the need for complex databases. The app will continue to function locally if the internet connection is lost, and will sync changes when the connection is restored.
-
-{{< cards cols="2" >}}
-{{< card link="/Second/google_setup/account/" title="Step 1: Service Account" icon="key" subtitle="Follow the instructions for setting up a Google Service Account and enabling the Google Sheets API." >}}
-{{< card link="/Second/google_setup/sheet/" title="Step 2: Template Sheet" icon="table" subtitle="Create a Google Sheet for holding attendance logs, and your member list." >}}
-{{< card link="/Second/install/" title="Step 3: Install" icon="download" subtitle="Install _SECOND_ on your desired platform." >}}
-{{< card link="/Second/config/" title="Step 4: Configure" icon="cog" subtitle="Configure _SECOND_ with your Google Service Account, Google Sheet information, and team customization." >}}
-{{< /cards >}}
-
-## Features
-
-- Supports 300+ members
-- Support multiple simultaneous kiosks to allow multiple entry points to the facility.
-- Quick and easy to sign in/out
-- RFID (HID) support for quick sign in/out (optional)
-- Supports team branding with a customizable logo and accent color
-- Cross-platform support for Linux (x86 and ARM), macOS (x86 and ARM), Windows (x86 ONLY), Android, iPadOS, and Web
-- Open source, expandable and available for anyone to implement
-- Support off site events (remote, portable device that can sync in real time with a hotspot or at a later time)
+</div>
