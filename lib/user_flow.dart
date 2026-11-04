@@ -4,7 +4,6 @@ import 'package:second/backend.dart';
 import 'package:second/message_board_loader.dart';
 import 'package:second/passwords.dart';
 import 'package:second/settings.dart';
-import 'package:second/settings_page.dart';
 import 'package:second/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';

@@ -1,6 +1,5 @@
 import 'package:second/log_printer.dart';
 import 'package:second/settings.dart';
-import 'package:second/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:second/widgets.dart';
