@@ -761,7 +761,7 @@ class _HomePageState extends State<HomePage>
 
   AppState _getStatus() {
     if (_backend.googleConnected.value == false) {
-      return AppState(Colors.amber, "Connection Lost", 0);
+      return AppState(Colors.red, "Not Connected", _backend.getPushLength());
     } else {
       return AppState(Colors.green, "System Online", _backend.getPushLength());
     }

@@ -7,5 +7,5 @@ class AppState {
 
   AppState(this.color, this.description, this.pushCount);
 
-  static AppState initial = AppState(Colors.white, 'Please Wait...', 0);
+  static AppState initial = AppState(Colors.white, 'Connecting...', 0);
 }
