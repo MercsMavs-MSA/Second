@@ -2,6 +2,8 @@ name: Build & Deploy Flutter Web
 
 on:
   push:
+    branches:
+      - main
     tags:
       - '*'
   workflow_dispatch:
@@ -28,6 +30,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Determine version details
+        id: version_info
+        run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION_NAME="${GITHUB_REF_NAME}"
+            VERSION_TYPE="tag"
+          else
+            VERSION_NAME="${COMMIT_SHA}"
+            VERSION_TYPE="commit"
+          fi
+          echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
+          echo "version_type=${VERSION_TYPE}" >> $GITHUB_OUTPUT
+          echo "commit_sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -38,22 +55,32 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter Web
-        run: flutter build web --release --base-href "/Second/app/"
+        run: |
+          VERSION="${{ steps.version_info.outputs.version_name }}"
+          flutter build web --release --base-href "/Second/app/${VERSION}/"
 
-      # Pull existing gh-pages so we can preserve the deployed docs
+      # Pull existing gh-pages so we can preserve deployed docs and existing versions
       - name: Pull existing gh-pages
         run: |
-          git fetch origin gh-pages
-          git worktree add gh-pages gh-pages
+          git fetch origin gh-pages || true
+          git worktree add gh-pages origin/gh-pages || git worktree add gh-pages gh-pages || true
           mkdir -p deploy
-          cp -r gh-pages/* deploy/ || true
-
-      # Replace ONLY the /app folder
-      - name: Update /app folder
-        run: |
-          rm -rf deploy/app
+          if [ -d gh-pages ]; then
+            cp -r gh-pages/* deploy/ || true
+          fi
           mkdir -p deploy/app
-          cp -r build/web/* deploy/app/
+
+      # Copy build output to version subfolder and update version manager
+      - name: Update web deployment versions
+        run: |
+          VERSION="${{ steps.version_info.outputs.version_name }}"
+          TYPE="${{ steps.version_info.outputs.version_type }}"
+          
+          mkdir -p "deploy/app/${VERSION}"
+          rm -rf "deploy/app/${VERSION:?}"/*
+          cp -r build/web/* "deploy/app/${VERSION}/"
+          
+          python3 web/manage_versions.py --deploy-dir deploy/app --version "${VERSION}" --type "${TYPE}"
 
       # Keep all other files (especially the docs) untouched
       - name: Deploy to GitHub Pages
