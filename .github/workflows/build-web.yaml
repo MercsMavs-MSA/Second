@@ -37,13 +37,16 @@ jobs:
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             VERSION_NAME="${GITHUB_REF_NAME}"
             VERSION_TYPE="tag"
+            DEPLOY_PATH="${GITHUB_REF_NAME}"
           else
             VERSION_NAME="${COMMIT_SHA}"
             VERSION_TYPE="commit"
+            DEPLOY_PATH="latest"
           fi
           echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
           echo "version_type=${VERSION_TYPE}" >> $GITHUB_OUTPUT
           echo "commit_sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
+          echo "deploy_path=${DEPLOY_PATH}" >> $GITHUB_OUTPUT
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -56,8 +59,8 @@ jobs:
 
       - name: Build Flutter Web
         run: |
-          VERSION="${{ steps.version_info.outputs.version_name }}"
-          flutter build web --release --base-href "/Second/app/${VERSION}/"
+          DEPLOY_PATH="${{ steps.version_info.outputs.deploy_path }}"
+          flutter build web --release --base-href "/Second/app/${DEPLOY_PATH}/"
 
       # Pull existing gh-pages so we can preserve deployed docs and existing versions
       - name: Pull existing gh-pages
@@ -75,10 +78,11 @@ jobs:
         run: |
           VERSION="${{ steps.version_info.outputs.version_name }}"
           TYPE="${{ steps.version_info.outputs.version_type }}"
+          DEPLOY_PATH="${{ steps.version_info.outputs.deploy_path }}"
           
-          mkdir -p "deploy/app/${VERSION}"
-          rm -rf "deploy/app/${VERSION:?}"/*
-          cp -r build/web/* "deploy/app/${VERSION}/"
+          mkdir -p "deploy/app/${DEPLOY_PATH}"
+          rm -rf "deploy/app/${DEPLOY_PATH:?}"/*
+          cp -r build/web/* "deploy/app/${DEPLOY_PATH}/"
           
           python3 web/manage_versions.py --deploy-dir deploy/app --version "${VERSION}" --type "${TYPE}"
 
