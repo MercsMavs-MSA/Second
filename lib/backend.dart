@@ -106,6 +106,7 @@ class CachedQueue<T> {
 
 class Member {
   final int id;
+  final List<int> badges;
   final String name;
   final String? nickname;
   final AttendanceStatus status;
@@ -116,6 +117,7 @@ class Member {
   final String? pfpUrl;
   Member(
     this.id,
+    this.badges,
     this.name,
     this.nickname,
     this.titles,
@@ -155,6 +157,7 @@ class Member {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'badges': badges,
       'name': name,
       'nickname': nickname,
       'titles': titles,
@@ -171,6 +174,7 @@ class Member {
       data['id'] is int
           ? data['id'] as int
           : int.tryParse(data['id'].toString()) ?? -1,
+      (data['badges'] as List<int>? ?? []),
       data['name'] as String,
       data['nickname'] as String?,
       (data['titles'] as String? ?? "Error loading title, please refresh members"),
@@ -850,6 +854,7 @@ class AttendanceTrackerBackend {
       newMembers.add(
         Member(
           int.tryParse(googleMember[appMembersSchema.indexOf("ID")].toString()) ?? -1,
+          ((googleMember[appMembersSchema.indexOf("BadgeIDs")].toString()).trim().split(",")).map((e) => int.tryParse(e.toString().trim())??-1).toList(),
           googleMember[appMembersSchema.indexOf("Name")] as String,
           (googleMember[appMembersSchema.indexOf("Nickname")] as String) == '' ? null : (googleMember[appMembersSchema.indexOf("Nickname")] as String),
           googleMember[appMembersSchema.indexOf("Titles")] as String,
@@ -1235,8 +1240,16 @@ class AttendanceTrackerBackend {
     return attendance.value.firstWhere((member) => member.id == id);
   }
 
+  Member getMemberByBadgeId(int id) {
+    return attendance.value.firstWhere((member) => member.badges.contains(id));
+  }
+
   bool isMember(int id) {
     return attendance.value.any((member) => member.id == id);
+  }
+
+  bool isBadgeMember(int id) {
+    return attendance.value.any((member) => member.badges.contains(id));
   }
 
   void clockOut(int memberId, {DateTime? time, bool isAuto = false}) {
@@ -1262,6 +1275,7 @@ class AttendanceTrackerBackend {
     if (memberIndex != -1) {
       attendance.value[memberIndex] = Member(
         attendance.value[memberIndex].id,
+        attendance.value[memberIndex].badges,
         attendance.value[memberIndex].name,
         attendance.value[memberIndex].nickname,
         attendance.value[memberIndex].titles,
@@ -1302,6 +1316,7 @@ class AttendanceTrackerBackend {
     if (memberIndex != -1) {
       attendance.value[memberIndex] = Member(
         attendance.value[memberIndex].id,
+        attendance.value[memberIndex].badges,
         attendance.value[memberIndex].name,
         attendance.value[memberIndex].nickname,
         attendance.value[memberIndex].titles,

@@ -588,12 +588,12 @@ class _HomePageState extends State<HomePage>
       _displayErrorPopup("Badge Read Error");
       return;
     }
-    if (!_backend.isMember(code)) {
+    if (!_backend.isBadgeMember(code)) {
       _displayErrorPopup("Member Not Found");
       widget.logger.w("Member not found: $code");
       return;
     }
-    beginUserFlow(context, _backend.getMemberById(code), true);
+    beginUserFlow(context, _backend.getMemberByBadgeId(code), true);
   }
 
   void _displayErrorPopup(String error) {

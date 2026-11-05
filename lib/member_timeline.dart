@@ -219,6 +219,7 @@ class MemberTimelineManager {
       final old = backend.attendance.value[index];
       backend.attendance.value[index] = Member(
         old.id,
+        old.badges,
         old.name,
         old.nickname,
         old.titles,
