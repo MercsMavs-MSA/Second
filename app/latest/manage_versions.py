@@ -51,23 +51,23 @@ def main():
         tags = []
 
     if args.type == "commit":
-        # Remove previous non-tagged commit directory if it differs
-        if latest_commit and latest_commit != args.version:
-            old_commit_dir = deploy_dir / latest_commit
-            if old_commit_dir.exists() and old_commit_dir.is_dir() and latest_commit not in tags:
-                print(f"Removing previous commit version directory: {latest_commit}")
-                shutil.rmtree(old_commit_dir, ignore_errors=True)
         latest_commit = args.version
     elif args.type == "tag":
         if args.version not in tags:
             tags.append(args.version)
 
-    # Detect any existing version subdirectories on disk
+    # Detect existing version subdirectories on disk
     for item in deploy_dir.iterdir():
         if item.is_dir() and (item / "index.html").exists():
-            if item.name == latest_commit:
+            if item.name == "latest":
                 continue
-            if item.name not in tags:
+            if item.name in tags:
+                continue
+            # Clean up legacy commit hash directories if present
+            if len(item.name) == 7 or len(item.name) == 40:
+                print(f"Removing legacy commit directory: {item.name}")
+                shutil.rmtree(item, ignore_errors=True)
+            else:
                 tags.append(item.name)
 
     tags = sort_tags(list(set(tags)))
@@ -87,7 +87,7 @@ def main():
 
 def generate_html(output_path, latest_commit, tags):
     if latest_commit:
-        commit_html = f'<ul>\n    <li><a href="./{latest_commit}/">{latest_commit}</a></li>\n  </ul>'
+        commit_html = f'<ul>\n    <li><a href="./latest/">Latest Commit ({latest_commit})</a></li>\n  </ul>'
     else:
         commit_html = "<p>No commit build available.</p>"
 
@@ -99,7 +99,7 @@ def generate_html(output_path, latest_commit, tags):
 
     options_html = []
     if latest_commit:
-        options_html.append(f'<option value="./{latest_commit}/">Latest Commit ({latest_commit})</option>')
+        options_html.append(f'<option value="./latest/">Latest Commit ({latest_commit})</option>')
     for t in tags:
         options_html.append(f'<option value="./{t}/">Tag {t}</option>')
 
