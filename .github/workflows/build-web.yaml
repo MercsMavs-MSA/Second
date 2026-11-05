@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 0.2-dev
+      - main
     tags:
       - '*'
   workflow_dispatch:
@@ -15,6 +16,7 @@ permissions:
 
 env:
   FLUTTER_VERSION: '3.x'
+  HUGO_VERSION: '0.168.0'
 
 # Serialize with the docs deploy (build-docs.yaml) so both workflows never
 # push to gh-pages at the same time.
@@ -29,6 +31,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Determine version details
         id: version_info
@@ -73,8 +77,8 @@ jobs:
           fi
           mkdir -p deploy/app
 
-      # Copy build output to version subfolder and update version manager
-      - name: Update web deployment versions
+      # Copy Flutter build output to version subfolder and update Hugo Markdown
+      - name: Update web deployment versions & generate Markdown
         run: |
           VERSION="${{ steps.version_info.outputs.version_name }}"
           TYPE="${{ steps.version_info.outputs.version_type }}"
@@ -84,11 +88,37 @@ jobs:
           rm -rf "deploy/app/${DEPLOY_PATH:?}"/*
           cp -r build/web/* "deploy/app/${DEPLOY_PATH}/"
           
-          python3 web/manage_versions.py --deploy-dir deploy/app --version "${VERSION}" --type "${TYPE}"
+          python3 -m pip install jinja2
+          python3 web/manage_versions.py --deploy-dir deploy/app --docs-content-dir docs/content/app --version "${VERSION}" --type "${TYPE}"
 
-      # Keep all other files (especially the docs) untouched
+      # Set up Go and Hugo to build documentation with Hextra
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: docs/go.mod
+          cache-dependency-path: docs/go.sum
+
+      - name: Set up Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      - name: Build Hugo docs
+        working-directory: docs
+        run: hugo build --gc --minify --logLevel warn
+
+      # Copy compiled Hugo site into deploy directory (updates /app/index.html via Hextra)
+      - name: Merge Hugo docs into deploy
+        run: |
+          if [ -f gh-pages/CNAME ]; then cp gh-pages/CNAME deploy/CNAME; fi
+          touch deploy/.nojekyll
+          cp -r docs/public/. deploy/
+
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: deploy
+          keep_files: false

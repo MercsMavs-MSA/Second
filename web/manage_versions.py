@@ -6,6 +6,11 @@ import shutil
 import sys
 from pathlib import Path
 
+try:
+    import jinja2
+except ImportError:
+    jinja2 = None
+
 
 def sort_tags(tags_list):
     def version_key(v):
@@ -25,14 +30,21 @@ def sort_tags(tags_list):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Manage web deployment versions and generate HTML UI.")
+    parser = argparse.ArgumentParser(description="Manage web deployment versions and generate Hugo Markdown using Jinja2 template.")
     parser.add_argument("--deploy-dir", required=True, help="Path to deploy/app directory")
-    parser.add_argument("--version", required=True, help="Version identifier (tag name or commit hash)")
-    parser.add_argument("--type", choices=["tag", "commit"], required=True, help="Version type ('tag' or 'commit')")
+    parser.add_argument("--docs-content-dir", help="Path to docs/content/app directory", default=None)
+    parser.add_argument("--version", help="Version identifier (tag name or commit hash)", default=None)
+    parser.add_argument("--type", choices=["tag", "commit"], help="Version type ('tag' or 'commit')", default=None)
+    parser.add_argument("--template", help="Path to Jinja2 Markdown template file", default=None)
     args = parser.parse_args()
 
     deploy_dir = Path(args.deploy_dir).resolve()
     deploy_dir.mkdir(parents=True, exist_ok=True)
+
+    docs_content_dir = Path(args.docs_content_dir).resolve() if args.docs_content_dir else Path(__file__).parent.parent / "docs" / "content" / "app"
+    docs_content_dir.mkdir(parents=True, exist_ok=True)
+
+    template_path = Path(args.template).resolve() if args.template else Path(__file__).parent / "version_manager_template.md"
 
     versions_file = deploy_dir / "versions.json"
 
@@ -50,9 +62,9 @@ def main():
     if not isinstance(tags, list):
         tags = []
 
-    if args.type == "commit":
+    if args.type == "commit" and args.version:
         latest_commit = args.version
-    elif args.type == "tag":
+    elif args.type == "tag" and args.version:
         if args.version not in tags:
             tags.append(args.version)
 
@@ -63,7 +75,6 @@ def main():
                 continue
             if item.name in tags:
                 continue
-            # Clean up legacy commit hash directories if present
             if len(item.name) == 7 or len(item.name) == 40:
                 print(f"Removing legacy commit directory: {item.name}")
                 shutil.rmtree(item, ignore_errors=True)
@@ -80,72 +91,32 @@ def main():
     with open(versions_file, "w", encoding="utf-8") as f:
         json.dump(versions_data, f, indent=2)
 
-    # Generate unstyled Version Manager HTML UI
-    generate_html(deploy_dir / "index.html", latest_commit, tags)
+    # Generate Markdown page in docs/content/app/_index.md using Jinja2 template
+    generate_markdown(docs_content_dir / "_index.md", template_path, latest_commit, tags)
     print(f"Updated version management: latest_commit={latest_commit}, tags={tags}")
 
 
-def generate_html(output_path, latest_commit, tags):
-    if latest_commit:
-        commit_html = f'<ul>\n    <li><a href="./latest/">Latest Commit ({latest_commit})</a></li>\n  </ul>'
+def generate_markdown(output_path, template_path, latest_commit, tags):
+    if not template_path.exists():
+        raise FileNotFoundError(f"Template file not found at: {template_path}")
+
+    with open(template_path, "r", encoding="utf-8") as f:
+        template_str = f.read()
+
+    if jinja2 is not None:
+        env = jinja2.Environment(
+            variable_start_string="[[",
+            variable_end_string="]]",
+            block_start_string="[%",
+            block_end_string="%]"
+        )
+        template = env.from_string(template_str)
+        rendered_md = template.render(latest_commit=latest_commit, tags=tags)
     else:
-        commit_html = "<p>No commit build available.</p>"
-
-    if tags:
-        tags_list_items = "\n".join([f'    <li><a href="./{t}/">{t}</a></li>' for t in tags])
-        tags_html = f'<ul>\n{tags_list_items}\n  </ul>'
-    else:
-        tags_html = "<p>No tagged versions available.</p>"
-
-    options_html = []
-    if latest_commit:
-        options_html.append(f'<option value="./latest/">Latest Commit ({latest_commit})</option>')
-    for t in tags:
-        options_html.append(f'<option value="./{t}/">Tag {t}</option>')
-
-    options_str = "\n      ".join(options_html) if options_html else '<option value="">No versions available</option>'
-
-    html_content = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web Deployment Version Manager</title>
-</head>
-<body>
-  <h1>Web Deployment Version Manager</h1>
-  <p>Select a version of the web application to launch:</p>
-
-  <h2>Latest Commit Version</h2>
-  {commit_html}
-
-  <h2>Tagged Versions</h2>
-  {tags_html}
-
-  <h2>Version Switcher</h2>
-  <form id="version-form">
-    <label for="version-select">Choose a version:</label>
-    <select id="version-select">
-      {options_str}
-    </select>
-    <button type="submit">Go to Version</button>
-  </form>
-
-  <script>
-    document.getElementById('version-form').addEventListener('submit', function(e) {{
-      e.preventDefault();
-      var selected = document.getElementById('version-select').value;
-      if (selected) {{
-        window.location.href = selected;
-      }}
-    }});
-  </script>
-</body>
-</html>
-"""
+        raise ImportError("jinja2 package is required to render the Markdown template. Install with 'pip install jinja2'")
 
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
+        f.write(rendered_md)
 
 
 if __name__ == "__main__":

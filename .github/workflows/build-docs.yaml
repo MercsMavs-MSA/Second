@@ -33,6 +33,19 @@ jobs:
           # Full history is required for Hugo's enableGitInfo (last updated date)
           fetch-depth: 0
 
+      # Reuse existing gh-pages tree to preserve /app deployment versions
+      - name: Prepare deploy directory and update version manager Markdown
+        run: |
+          git fetch origin gh-pages || true
+          git worktree add gh-pages origin/gh-pages || git worktree add gh-pages gh-pages || true
+          mkdir -p deploy
+          if [ -d gh-pages/app ]; then cp -r gh-pages/app deploy/app; fi
+          if [ -f gh-pages/CNAME ]; then cp gh-pages/CNAME deploy/CNAME; fi
+          mkdir -p deploy/app
+          
+          python3 -m pip install jinja2
+          python3 web/manage_versions.py --deploy-dir deploy/app --docs-content-dir docs/content/app
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -49,19 +62,12 @@ jobs:
         working-directory: docs
         run: hugo build --gc --minify --logLevel warn
 
-      # Reuse the existing gh-pages tree so the Flutter web app (/app) survives.
-      - name: Prepare deploy directory
+      - name: Merge Hugo docs into deploy
         run: |
-          git fetch origin gh-pages
-          git worktree add gh-pages origin/gh-pages
-          mkdir -p deploy
-          if [ -d gh-pages/app ]; then cp -r gh-pages/app deploy/app; fi
-          if [ -f gh-pages/CNAME ]; then cp gh-pages/CNAME deploy/CNAME; fi
           touch deploy/.nojekyll
           cp -r docs/public/. deploy/
 
-      # The docs are published at the site root; keep_files is disabled so the
-      # obsolete mike/mkdocs output under /docs is removed.
+      # The docs are published at the site root; keep_files is disabled so obsolete files are removed
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
