@@ -4,13 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
+import 'backend.dart';
+
 class DeveloperOptionsPage extends StatefulWidget {
   const DeveloperOptionsPage({
     super.key,
+    required this.backend,
     required this.settingsManager,
     required this.logger,
   });
 
+  final AttendanceTrackerBackend backend;
   final SettingsManager settingsManager;
   final Logger logger;
 
@@ -24,7 +28,7 @@ class _DeveloperOptionsPageState extends State<DeveloperOptionsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Developer Options')),
       body: ListView.builder(
-        itemCount: widget.settingsManager.developerOptions.length + 2,
+        itemCount: widget.settingsManager.developerOptions.length + 3,
         itemBuilder: (context, index) {
           if (index == 0) {
             return ListTile(
@@ -86,7 +90,24 @@ class _DeveloperOptionsPageState extends State<DeveloperOptionsPage> {
               ),
             );
           }
-          index -= 2;
+
+          if (index == 2) {
+            return ListTile(
+              title: const Text("Force clock in all members"),
+              subtitle: const Text(
+                "All members will be checked in to 'Debug Location'",
+                style: TextStyle(color: Colors.orange),
+              ),
+              leading: const Icon(Icons.system_security_update),
+              onTap: () {
+                for (Member member in widget.backend.attendance.value) {
+                  widget.backend.clockIn(member.id, "Debug Location");
+                }
+              },
+            );
+          }
+
+          index -= 3;
           return ListTile(
             minTileHeight: 64,
             leading: Icon(Icons.settings),

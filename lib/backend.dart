@@ -174,7 +174,7 @@ class Member {
       data['id'] is int
           ? data['id'] as int
           : int.tryParse(data['id'].toString()) ?? -1,
-      (data['badges'] as List<int>? ?? []),
+      (data['badges'] as List<dynamic>? ?? []).map((e) => int.parse(e.toString())).toList(),
       data['name'] as String,
       data['nickname'] as String?,
       (data['titles'] as String? ?? "Error loading title, please refresh members"),

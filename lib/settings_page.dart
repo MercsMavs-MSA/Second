@@ -1073,6 +1073,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                       MaterialPageRoute(
                                         builder: (context) =>
                                             DeveloperOptionsPage(
+                                              backend: widget.backend,
                                               settingsManager: _settingsManager,
                                               logger: widget.logger,
                                             ),
