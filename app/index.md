@@ -17,5 +17,9 @@ This release is experimental, and may not work correctly. Use at your own risk.
 ## Tagged Releases
 
 
-*No tagged release versions available.*
+{{< cards >}}
+
+  {{< card link="./0.2.0+12-alpha5/" title="Release 0.2.0+12-alpha5" icon="tag" subtitle="Official release 0.2.0+12-alpha5" >}}
+
+{{< /cards >}}
 
