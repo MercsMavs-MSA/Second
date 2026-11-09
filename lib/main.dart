@@ -29,6 +29,7 @@ import 'package:second/user_flow.dart';
 import 'package:second/util.dart';
 import 'package:second/widgets.dart';
 import 'package:second/optimization.dart';
+import 'package:second/passwords.dart';
 import 'package:second/introduction.dart';
 
 import 'log_printer.dart';
@@ -674,21 +675,25 @@ class _HomePageState extends State<HomePage>
                                         return;
                                       }
 
-                                      // 2. Add badge id to their membership
-                                      final updatedBadges = List<int>.from(member.badges)..add(code);
                                       Navigator.of(routeContext).pop();
 
-                                      widget.logger.i("Enrolling badge $code to member ${member.name} (ID: ${member.id})");
-                                      await _backend.updateBadges(member.id, updatedBadges);
+                                      // 2. Require PIN entry/verification before adding the card
+                                      _showPinVerificationDialog(cachedContext, member, () async {
+                                        // 3. Add badge id to their membership
+                                        final updatedBadges = List<int>.from(member.badges)..add(code);
 
-                                      if (!mounted) return;
-                                      // 3. Play configure animation for its duration, then pop up user flow
-                                      // ignore: use_build_context_synchronously
-                                      _displayConfigureAnimationPopup(cachedContext, () {
+                                        widget.logger.i("Enrolling badge $code to member ${member.name} (ID: ${member.id})");
+                                        await _backend.updateBadges(member.id, updatedBadges);
+
                                         if (!mounted) return;
-                                        final enrolledMember = _backend.getMemberById(member.id);
+                                        // 4. Play configure animation for its duration, then pop up user flow
                                         // ignore: use_build_context_synchronously
-                                        beginUserFlow(cachedContext, enrolledMember, true);
+                                        _displayConfigureAnimationPopup(cachedContext, () {
+                                          if (!mounted) return;
+                                          final enrolledMember = _backend.getMemberById(member.id);
+                                          // ignore: use_build_context_synchronously
+                                          beginUserFlow(cachedContext, enrolledMember, true);
+                                        });
                                       });
                                     },
                                   );
@@ -710,6 +715,131 @@ class _HomePageState extends State<HomePage>
           );
         },
       ),
+    );
+  }
+
+  void _showPinVerificationDialog(BuildContext context, Member member, VoidCallback onSuccess) {
+    if (!mounted) return;
+    String enteredPin = '';
+    String newPin = '';
+    bool isSettingPin = member.passwordHash == null || !isValidHash(member.passwordHash!);
+    String pinError = '';
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(isSettingPin ? 'Set PIN for ${member.name}' : 'Enter PIN for ${member.name}'),
+              content: SizedBox(
+                width: 400,
+                height: 380,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      isSettingPin ? 'Please set a 6-digit PIN to add a card' : 'Enter your 6-digit PIN to add a card',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        6,
+                        (index) => Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index < (isSettingPin ? newPin.length : enteredPin.length)
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.surfaceContainerHigh,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (pinError.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(pinError, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: PinKeypad(
+                        onKeyPressed: (key) async {
+                          final nav = Navigator.of(dialogContext);
+                          if (isSettingPin) {
+                            if (newPin.length < 6) {
+                              setState(() {
+                                newPin += key;
+                              });
+                              if (newPin.length == 6) {
+                                nav.pop();
+                                await _backend.resetPassword(member.id, newPin);
+                                onSuccess();
+                              }
+                            }
+                          } else {
+                            if (enteredPin.length < 6) {
+                              setState(() {
+                                enteredPin += key;
+                              });
+                              if (enteredPin.length == 6) {
+                                if (member.passwordHash == hashPin(enteredPin)) {
+                                  nav.pop();
+                                  onSuccess();
+                                } else {
+                                  setState(() {
+                                    pinError = 'Invalid PIN';
+                                    enteredPin = '';
+                                  });
+                                }
+                              }
+                            }
+                          }
+                        },
+                        onClear: () {
+                          setState(() {
+                            if (isSettingPin) {
+                              newPin = '';
+                            } else {
+                              enteredPin = '';
+                            }
+                            pinError = '';
+                          });
+                        },
+                        onBackspace: () {
+                          setState(() {
+                            if (isSettingPin) {
+                              if (newPin.isNotEmpty) {
+                                newPin = newPin.substring(0, newPin.length - 1);
+                              }
+                            } else {
+                              if (enteredPin.isNotEmpty) {
+                                enteredPin = enteredPin.substring(0, enteredPin.length - 1);
+                              }
+                            }
+                            pinError = '';
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
