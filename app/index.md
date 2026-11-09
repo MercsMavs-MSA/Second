@@ -10,7 +10,7 @@ This release is experimental, and may not work correctly. Use at your own risk.
 
 
 {{< cards >}}
-  {{< card link="./latest/" title="Commit 9dbdc94" icon="code" subtitle="Latest build compiled directly from default branch" >}}
+  {{< card link="./latest/" title="Commit 74c716d" icon="code" subtitle="Latest build compiled directly from default branch" >}}
 {{< /cards >}}
 
 
