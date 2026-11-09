@@ -302,6 +302,12 @@ class PasswordResetEvent extends TimeClockEvent {
   PasswordResetEvent(super.memberId, super.time, this.newHash);
 }
 
+class UpdateBadgesEvent extends TimeClockEvent {
+  final List<int> newBadges;
+
+  UpdateBadgesEvent(super.memberId, super.time, this.newBadges);
+}
+
 class TimeoutClient extends http.BaseClient {
   final http.Client _inner;
   final Duration timeout;
@@ -851,10 +857,19 @@ class AttendanceTrackerBackend {
         parsedPfp = parsedPfp?.replaceFirst("=image(\"", "");
         parsedPfp = parsedPfp?.substring(0, parsedPfp.length - 2).trim();
       }
+      final badgeIdsStr = googleMember[appMembersSchema.indexOf("BadgeIDs")].toString().trim();
+      final badgeIds = badgeIdsStr.isEmpty
+          ? <int>[]
+          : badgeIdsStr
+              .split(",")
+              .map((e) => int.tryParse(e.toString().trim()))
+              .whereType<int>()
+              .toList();
+
       newMembers.add(
         Member(
           int.tryParse(googleMember[appMembersSchema.indexOf("ID")].toString()) ?? -1,
-          ((googleMember[appMembersSchema.indexOf("BadgeIDs")].toString()).trim().split(",")).map((e) => int.tryParse(e.toString().trim())??-1).toList(),
+          badgeIds,
           googleMember[appMembersSchema.indexOf("Name")] as String,
           (googleMember[appMembersSchema.indexOf("Nickname")] as String) == '' ? null : (googleMember[appMembersSchema.indexOf("Nickname")] as String),
           googleMember[appMembersSchema.indexOf("Titles")] as String,
@@ -906,6 +921,7 @@ class AttendanceTrackerBackend {
     Map<int, List<AttendanceStatus>> userStatusUpdates = {};
     Map<int, String> userLocationUpdates = {};
     Map<int, String> passwordHashUpdates = {};
+    Map<int, List<int>> memberBadgeUpdates = {};
 
     ValueRange? memberIdTableResponse;
     try {
@@ -951,6 +967,9 @@ class AttendanceTrackerBackend {
       if (event is PasswordResetEvent) {
         passwordHashUpdates[event.memberId] = event.newHash;
         continue;
+      }
+      if (event is UpdateBadgesEvent) {
+        memberBadgeUpdates[event.memberId] = event.newBadges;
       }
 
       if (event is ClockOutEvent) {
@@ -1036,6 +1055,25 @@ class AttendanceTrackerBackend {
             range: range,
             values: [
               [hash],
+            ],
+          ),
+        );
+      }
+
+      // Add badge updates
+      for (final entry in memberBadgeUpdates.entries) {
+        final memberId = entry.key;
+        final badges = entry.value;
+        final index = memberIds.indexOf(memberId);
+        if (index == -1) continue;
+        final row = index + 3;
+        final range = '${memberSheetContentsRange.split("!").first}!B$row';
+        print(badges);
+        updates.add(
+          ValueRange(
+            range: range,
+            values: [
+              ["'${badges.join(',')}"],
             ],
           ),
         );
@@ -1345,7 +1383,37 @@ class AttendanceTrackerBackend {
       await _waitUntilQueuesEmpty();
       await _updateMembers();
     }
+    _reactivateCooldown();
+  }
 
+  Future<void> updateBadges(int memberId, List<int> newBadges) async {
+    final event = UpdateBadgesEvent(memberId, DateTime.now(), newBadges);
+    _updatesQueue.add(event);
+
+    final memberIndex = attendance.value.indexWhere((m) => m.id == memberId);
+    if (memberIndex != -1) {
+      final old = attendance.value[memberIndex];
+      attendance.value[memberIndex] = Member(
+        old.id,
+        newBadges,
+        old.name,
+        old.nickname,
+        old.titles,
+        old.groups,
+        old.status,
+        location: old.location,
+        passwordHash: old.passwordHash,
+        pfpUrl: old.pfpUrl,
+      );
+      attendance.value = List.from(attendance.value);
+    }
+
+    while (_updatesQueue.contains(event)) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      await _update();
+      await _waitUntilQueuesEmpty();
+      await _updateMembers();
+    }
     _reactivateCooldown();
   }
 

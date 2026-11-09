@@ -77,212 +77,215 @@ class _ManagementPageState extends State<ManagementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Member Management")),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchQuery,
-                    decoration: InputDecoration(
-                      hintText: 'Search name...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8.0),
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.filter_list),
-                  tooltip: "Sort",
-                  onSelected: (value) {
-                    setState(() {
-                      if (value == 'name_asc') {
-                        _sortCriteria = 'name';
-                        _sortAscending = true;
-                      } else if (value == 'name_desc') {
-                        _sortCriteria = 'name';
-                        _sortAscending = false;
-                      } else if (value == 'status_asc') {
-                        _sortCriteria = 'status';
-                        _sortAscending = true;
-                      } else if (value == 'status_desc') {
-                        _sortCriteria = 'status';
-                        _sortAscending = false;
-                      } else if (value == 'none') {
-                        _sortCriteria = 'none';
-                        _sortAscending = false;
-                      }
-                    });
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'name_asc',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.sort_by_alpha),
-                          const SizedBox(width: 8),
-                          const Text('Name (A-Z)'),
-                          const Spacer(),
-                          if (_sortCriteria == "name" && _sortAscending)
-                            const Icon(Icons.check),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'name_desc',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.sort_by_alpha),
-                          const SizedBox(width: 8),
-                          const Text('Name (Z-A)'),
-                          const Spacer(),
-                          if (_sortCriteria == "name" && !_sortAscending)
-                            const Icon(Icons.check),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'status_asc',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.query_stats),
-                          const SizedBox(width: 8),
-                          const Text('Status (Present First)'),
-                          const Spacer(),
-                          if (_sortCriteria == "status" && _sortAscending)
-                            const Icon(Icons.check),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'status_desc',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.query_stats),
-                          const SizedBox(width: 8),
-                          const Text('Status (Out First)'),
-                          const Spacer(),
-                          if (_sortCriteria == "status" && !_sortAscending)
-                            const Icon(Icons.check),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'none',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.filter_alt_off),
-                          const SizedBox(width: 8),
-                          const Text('Do Not Sort'),
-                          const Spacer(),
-                          if (_sortCriteria == "none") const Icon(Icons.check),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 8.0),
-              ],
-            ),
-            const SizedBox(height: 8.0),
-            Expanded(
-              child: ValueListenableBuilder<List<Member>>(
-                valueListenable: widget.backend.attendance,
-                builder: (context, attendanceValue, child) {
-                  final filtered = _getFilteredMembers(attendanceValue);
-                  if (filtered.isEmpty) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.no_accounts,
-                          size: 128,
-                          color: Theme.of(context).colorScheme.primaryFixedDim,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchQuery,
+                      decoration: InputDecoration(
+                        hintText: 'Search name...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        const Text("No members found matching the search criteria"),
-                      ],
-                    );
-                  }
-                  return ListView.builder(
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final member = filtered[index];
-                      return ListTile(
-                        leading: Stack(
-                          alignment: Alignment.bottomRight,
+                      ),
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.filter_list),
+                    tooltip: "Sort",
+                    onSelected: (value) {
+                      setState(() {
+                        if (value == 'name_asc') {
+                          _sortCriteria = 'name';
+                          _sortAscending = true;
+                        } else if (value == 'name_desc') {
+                          _sortCriteria = 'name';
+                          _sortAscending = false;
+                        } else if (value == 'status_asc') {
+                          _sortCriteria = 'status';
+                          _sortAscending = true;
+                        } else if (value == 'status_desc') {
+                          _sortCriteria = 'status';
+                          _sortAscending = false;
+                        } else if (value == 'none') {
+                          _sortCriteria = 'none';
+                          _sortAscending = false;
+                        }
+                      });
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'name_asc',
+                        child: Row(
                           children: [
-                            CircleAvatar(
-                              child: member.pfpUrl != null
-                                  ? ClipOval(
-                                      child: FadeInImage.memoryNetwork(
-                                        placeholder: kTransparentImage,
-                                        image: member.pfpUrl!,
-                                      ),
-                                    )
-                                  : Builder(
-                                      builder: (context) {
-                                        List<String> nameParts = member
-                                            .getVisualName()
-                                            .split(' ');
-                                        nameParts.removeWhere(
-                                          (val) => val.isEmpty,
-                                        );
-                                        return Text(
-                                          nameParts
-                                              .map((part) => part[0])
-                                              .take(2)
-                                              .join(),
-                                        );
-                                      },
-                                    ),
-                            ),
-                            Stack(
-                              alignment: AlignmentGeometry.center,
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainer,
-                                  size: 16,
-                                ),
-                                Icon(
-                                  Icons.circle,
-                                  color: member.status == AttendanceStatus.present
-                                      ? Colors.green
-                                      : Colors.red,
-                                  size: 12,
-                                ),
-                              ],
-                            ),
+                            const Icon(Icons.sort_by_alpha),
+                            const SizedBox(width: 8),
+                            const Text('Name (A-Z)'),
+                            const Spacer(),
+                            if (_sortCriteria == "name" && _sortAscending)
+                              const Icon(Icons.check),
                           ],
                         ),
-                        title: Text(member.getVisualName()),
-                        subtitle: Text(
-                          member.getTitles()?.join(" · ") ??
-                              "Error loading title, please refresh members",
+                      ),
+                      PopupMenuItem(
+                        value: 'name_desc',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.sort_by_alpha),
+                            const SizedBox(width: 8),
+                            const Text('Name (Z-A)'),
+                            const Spacer(),
+                            if (_sortCriteria == "name" && !_sortAscending)
+                              const Icon(Icons.check),
+                          ],
                         ),
-                        onTap: () {
-                          _openMemberDetails(member);
-                        },
-                      );
-                    },
-                  );
-                },
+                      ),
+                      PopupMenuItem(
+                        value: 'status_asc',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.query_stats),
+                            const SizedBox(width: 8),
+                            const Text('Status (Present First)'),
+                            const Spacer(),
+                            if (_sortCriteria == "status" && _sortAscending)
+                              const Icon(Icons.check),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'status_desc',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.query_stats),
+                            const SizedBox(width: 8),
+                            const Text('Status (Out First)'),
+                            const Spacer(),
+                            if (_sortCriteria == "status" && !_sortAscending)
+                              const Icon(Icons.check),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'none',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.filter_alt_off),
+                            const SizedBox(width: 8),
+                            const Text('Do Not Sort'),
+                            const Spacer(),
+                            if (_sortCriteria == "none") const Icon(Icons.check),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8.0),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8.0),
+          Expanded(
+            child: ValueListenableBuilder<List<Member>>(
+              valueListenable: widget.backend.attendance,
+              builder: (context, attendanceValue, child) {
+                final filtered = _getFilteredMembers(attendanceValue);
+                if (filtered.isEmpty) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.no_accounts,
+                        size: 128,
+                        color: Theme.of(context).colorScheme.primaryFixedDim,
+                      ),
+                      const Text("No members found matching the search criteria"),
+                    ],
+                  );
+                }
+                return ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final member = filtered[index];
+                    return ListTile(
+                      leading: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            child: member.pfpUrl != null
+                                ? ClipOval(
+                                    child: FadeInImage.memoryNetwork(
+                                      placeholder: kTransparentImage,
+                                      image: member.pfpUrl!,
+                                    ),
+                                  )
+                                : Builder(
+                                    builder: (context) {
+                                      List<String> nameParts = member
+                                          .getVisualName()
+                                          .split(' ');
+                                      nameParts.removeWhere(
+                                        (val) => val.isEmpty,
+                                      );
+                                      return Text(
+                                        nameParts
+                                            .map((part) => part[0])
+                                            .take(2)
+                                            .join(),
+                                      );
+                                    },
+                                  ),
+                          ),
+                          Stack(
+                            alignment: AlignmentGeometry.center,
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainer,
+                                size: 16,
+                              ),
+                              Icon(
+                                Icons.circle,
+                                color: member.status == AttendanceStatus.present
+                                    ? Colors.green
+                                    : Colors.red,
+                                size: 12,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      title: Text(member.getVisualName()),
+                      subtitle: Text(
+                        member.getTitles()?.join(" · ") ??
+                            "Error loading title, please refresh members",
+                      ),
+                      onTap: () {
+                        _openMemberDetails(member);
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

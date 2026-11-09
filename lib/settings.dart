@@ -71,6 +71,7 @@ class SettingsManager {
       'security.pin': '000000',
       'list.disable': false,
       'rfid.reader': 'hid',
+      'rfid.enrollment': true,
       'rfid.hid.timeout': 0.2,
       'rfid.hid.eol': 'RETURN',
       'rfid.hid.format': 'decAscii',

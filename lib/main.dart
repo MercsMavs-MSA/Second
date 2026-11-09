@@ -589,11 +589,128 @@ class _HomePageState extends State<HomePage>
       return;
     }
     if (!_backend.isBadgeMember(code)) {
+
+      if (widget.settingsManager.getValue('rfid.enrollment') ?? widget.settingsManager.getDefault('rfid.enrollment')!) {
+        _showEnrollmentPopup(code);
+        return;
+      }
+
       _displayErrorPopup("Member Not Found");
       widget.logger.w("Member not found: $code");
       return;
     }
     beginUserFlow(context, _backend.getMemberByBadgeId(code), true);
+  }
+
+  void _showEnrollmentPopup(int code) {
+    if (!mounted) return;
+    final cachedContext = context;
+    final TextEditingController searchController = TextEditingController();
+    String searchQuery = '';
+
+    Navigator.of(cachedContext).push(
+      MaterialPageRoute(
+        builder: (routeContext) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              final members = _backend.attendance.value.where((m) {
+                if (searchQuery.isEmpty) return true;
+                return m.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+                    (m.nickname != null && m.nickname!.toLowerCase().contains(searchQuery.toLowerCase()));
+              }).toList();
+              members.sort((a, b) => a.name.compareTo(b.name));
+
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text('Enroll Badge #$code'),
+                  leading: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      searchController.dispose();
+                      Navigator.of(routeContext).pop();
+                    },
+                  ),
+                ),
+                body: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      VirtualTextField(
+                        controller: searchController,
+                        decoration: const InputDecoration(
+                          labelText: 'Search Member',
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (val) {
+                          setState(() {
+                            searchQuery = val;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: members.isEmpty
+                            ? const Center(child: Text('No members found'))
+                            : ListView.builder(
+                                itemCount: members.length,
+                                itemBuilder: (context, index) {
+                                  final member = members[index];
+                                  return ListTile(
+                                    leading: CircleAvatar(
+                                      child: Text(member.name.isNotEmpty ? member.name[0].toUpperCase() : '?'),
+                                    ),
+                                    title: Text(member.name),
+                                    subtitle: member.nickname != null
+                                        ? Text('Nickname: ${member.nickname}')
+                                        : (member.badges.isNotEmpty ? Text('Badges: ${member.badges.join(", ")}') : null),
+                                    onTap: () async {
+                                      searchController.dispose();
+                                      // 1. Verify that the tag doesn't also belong to anyone else
+                                      if (_backend.isBadgeMember(code)) {
+                                        Navigator.of(routeContext).pop();
+                                        _displayErrorPopup("Badge Already Assigned");
+                                        widget.logger.w("Badge $code already assigned to another member");
+                                        return;
+                                      }
+
+                                      // 2. Add badge id to their membership
+                                      final updatedBadges = List<int>.from(member.badges)..add(code);
+                                      Navigator.of(routeContext).pop();
+
+                                      widget.logger.i("Enrolling badge $code to member ${member.name} (ID: ${member.id})");
+                                      await _backend.updateBadges(member.id, updatedBadges);
+
+                                      if (!mounted) return;
+                                      // 3. Play configure animation for its duration, then pop up user flow
+                                      // ignore: use_build_context_synchronously
+                                      _displayConfigureAnimationPopup(cachedContext, () {
+                                        if (!mounted) return;
+                                        final enrolledMember = _backend.getMemberById(member.id);
+                                        // ignore: use_build_context_synchronously
+                                        beginUserFlow(cachedContext, enrolledMember, true);
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 200,
+                        child: VirtualKeyboard(
+                          rootLayoutPath: "assets/layouts/en-US.xml",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   void _displayErrorPopup(String error) {
@@ -648,6 +765,36 @@ class _HomePageState extends State<HomePage>
           ),
           actionsPadding: EdgeInsets.zero,
           actions: [],
+        );
+      },
+    );
+  }
+
+  void _displayConfigureAnimationPopup(BuildContext context, VoidCallback onComplete) {
+    if (!mounted) return;
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                'assets/animations/configure.json',
+                onLoaded: (composition) {
+                  Timer(composition.duration, () {
+                    if (mounted) {
+                      Navigator.of(dialogContext).pop();
+                      onComplete();
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actions: const [],
         );
       },
     );

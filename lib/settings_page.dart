@@ -948,6 +948,21 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     ListTile(
+                      title: Text("Enable RFID Enrollment Features"),
+                      subtitle: Text("Allows members to enroll new RFID tags by scanning one in."),
+                      leading: Icon(Icons.add_card),
+                      trailing: Switch(
+                        value:
+                        _settingsManager.getValue<bool>("rfid.enrollment") ??
+                            false,
+                        onChanged: (value) {
+                          setState(() {
+                            _settingsManager.setValue("rfid.enrollment", value);
+                          });
+                        },
+                      ),
+                    ),
+                    ListTile(
                       title: Text("Disable Non-RFID sign in"),
                       subtitle: Text("Forces members to sign in using RFID."),
                       leading: Icon(Icons.menu_book),
