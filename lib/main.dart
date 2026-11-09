@@ -677,16 +677,18 @@ class _HomePageState extends State<HomePage>
 
                                       Navigator.of(routeContext).pop();
 
-                                      // 2. Require PIN entry/verification before adding the card
-                                      _showPinVerificationDialog(cachedContext, member, () async {
-                                        // 3. Add badge id to their membership
+                                      final groups = member.getGroups();
+                                      final requiresPin = groups?.contains("require-pin") ?? false;
+
+                                      Future<void> performEnrollment() async {
+                                        // Add badge id to their membership
                                         final updatedBadges = List<int>.from(member.badges)..add(code);
 
                                         widget.logger.i("Enrolling badge $code to member ${member.name} (ID: ${member.id})");
                                         await _backend.updateBadges(member.id, updatedBadges);
 
                                         if (!mounted) return;
-                                        // 4. Play configure animation for its duration, then pop up user flow
+                                        // Play configure animation for its duration, then pop up user flow
                                         // ignore: use_build_context_synchronously
                                         _displayConfigureAnimationPopup(cachedContext, () {
                                           if (!mounted) return;
@@ -694,7 +696,13 @@ class _HomePageState extends State<HomePage>
                                           // ignore: use_build_context_synchronously
                                           beginUserFlow(cachedContext, enrolledMember, true);
                                         });
-                                      });
+                                      }
+
+                                      if (requiresPin) {
+                                        _showPinVerificationDialog(cachedContext, member, performEnrollment);
+                                      } else {
+                                        await performEnrollment();
+                                      }
                                     },
                                   );
                                 },
