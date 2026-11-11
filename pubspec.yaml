@@ -40,7 +40,7 @@ dependencies:
   shared_preferences: ^2.5.4
   file_picker: ^13.1.0
   async: ^2.13.0
-  lottie: ^3.5.1
+  lottie: ^3.8.2
   googleapis: ^17.0.0
   googleapis_auth: ^2.0.0
   http: ^1.6.0
